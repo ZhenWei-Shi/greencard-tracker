@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>绿卡排期追踪</title>
+  <title>Green Card Priority Date Tracker</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     :root {
@@ -21,9 +21,33 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: #263238; }
 
-    header { background: var(--green); color: #fff; padding: 14px 20px; display: flex; align-items: center; gap: 10px; }
-    header h1 { font-size: 1.15rem; font-weight: 600; }
-    header small { background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 12px; font-size: 0.72rem; }
+    header {
+      background: var(--green);
+      color: #fff;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    header .title-group { display: flex; align-items: center; gap: 10px; flex: 1; }
+    header h1 { font-size: 1.1rem; font-weight: 600; }
+    header small { background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 12px; font-size: 0.72rem; white-space: nowrap; }
+
+    .lang-switcher { display: flex; gap: 4px; }
+    .lang-btn {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.35);
+      color: #fff;
+      padding: 4px 10px;
+      border-radius: 16px;
+      font-size: 0.78rem;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.15s;
+    }
+    .lang-btn:hover { background: rgba(255,255,255,0.28); }
+    .lang-btn.active { background: rgba(255,255,255,0.9); color: var(--green); font-weight: 700; }
 
     .container { max-width: 900px; margin: 0 auto; padding: 18px 14px; }
 
@@ -34,26 +58,26 @@
     .s-green { background: var(--green-light); border-color: var(--green); }
     .s-yellow { background: var(--yellow-light); border-color: var(--yellow); }
     .s-red { background: var(--red-light); border-color: var(--red); }
-    .status-box .label { font-size: 0.8rem; color: var(--gray); margin-bottom: 4px; }
-    .status-box .big { font-size: 1.65rem; font-weight: 700; }
+    .status-box .lbl { font-size: 0.8rem; color: var(--gray); margin-bottom: 4px; }
+    .status-box .big { font-size: 1.6rem; font-weight: 700; }
     .status-box .detail { font-size: 0.88rem; margin-top: 5px; color: #444; }
 
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     @media(max-width:480px){ .form-row { grid-template-columns: 1fr; } }
     label { display: block; font-size: 0.78rem; color: var(--gray); font-weight: 600; margin-bottom: 3px; }
     select, input[type=date], input[type=number] {
-      width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 7px;
+      width: 100%; padding: 8px 10px;
+      border: 1px solid var(--border); border-radius: 7px;
       font-size: 0.9rem; background: #fafafa;
     }
     select:focus, input:focus { outline: none; border-color: var(--green); }
 
     .btn { background: var(--green); color: #fff; border: none; padding: 9px 18px; border-radius: 7px; font-size: 0.9rem; cursor: pointer; font-weight: 600; }
     .btn:hover { opacity: .87; }
-    .btn-gray { background: var(--gray); }
     .btn-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 12px; }
 
-    .tabs { display: flex; gap: 6px; margin-bottom: 12px; }
-    .tab { padding: 5px 14px; border-radius: 18px; border: 1px solid var(--border); cursor: pointer; font-size: 0.84rem; background: #fff; }
+    .tabs { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+    .tab { padding: 5px 14px; border-radius: 18px; border: 1px solid var(--border); cursor: pointer; font-size: 0.84rem; background: #fff; white-space: nowrap; }
     .tab.on { background: var(--green); color: #fff; border-color: var(--green); }
 
     .chart-box { height: 260px; position: relative; }
@@ -66,92 +90,112 @@
     .tag-u { background: #fce4ec; color: #880e4f; padding: 1px 7px; border-radius: 9px; font-size: 0.75rem; }
 
     .msg { text-align: center; color: #aaa; padding: 28px 0; font-size: 0.88rem; }
-    #update-time { font-size: 0.75rem; color: #aaa; margin-top: 6px; }
+    #update-time { font-size: 0.75rem; color: #aaa; margin-top: 8px; }
+
+    footer {
+      text-align: center;
+      padding: 24px 16px;
+      font-size: 0.78rem;
+      color: #90a4ae;
+    }
+    footer a { color: #90a4ae; }
   </style>
 </head>
 <body>
 
 <header>
-  <span style="font-size:1.4rem">🇺🇸</span>
-  <h1>绿卡排期追踪</h1>
-  <small id="data-version">加载中…</small>
+  <div class="title-group">
+    <span style="font-size:1.4rem">🇺🇸</span>
+    <h1 data-i18n="title">Green Card Priority Date Tracker</h1>
+    <small id="data-version">...</small>
+  </div>
+  <div class="lang-switcher">
+    <button class="lang-btn" onclick="setLang('en')">EN</button>
+    <button class="lang-btn" onclick="setLang('zh')">中文</button>
+    <button class="lang-btn" onclick="setLang('es')">ES</button>
+  </div>
 </header>
 
 <div class="container">
 
-  <!-- 个人设置 -->
+  <!-- Personal settings -->
   <div class="card">
-    <div class="card-title">我的 Priority Date</div>
+    <div class="card-title" data-i18n="section_profile">My Priority Date</div>
     <div class="form-row">
       <div>
-        <label>签证类别</label>
+        <label data-i18n="label_category">Visa Category</label>
         <select id="s-cat">
           <option value="EB1">EB-1</option>
           <option value="EB2" selected>EB-2</option>
           <option value="EB3">EB-3</option>
           <option value="EB4">EB-4</option>
           <option value="EB5">EB-5</option>
-          <option value="F1">F1（配偶/子女）</option>
-          <option value="F2A">F2A</option>
-          <option value="F2B">F2B</option>
-          <option value="F3">F3</option>
-          <option value="F4">F4</option>
+          <option value="F1" data-i18n-opt="opt_f1">F1 (Unmarried sons/daughters of U.S. Citizens)</option>
+          <option value="F2A" data-i18n-opt="opt_f2a">F2A (Spouses/children of LPRs)</option>
+          <option value="F2B" data-i18n-opt="opt_f2b">F2B (Unmarried sons/daughters of LPRs)</option>
+          <option value="F3" data-i18n-opt="opt_f3">F3 (Married sons/daughters of U.S. Citizens)</option>
+          <option value="F4" data-i18n-opt="opt_f4">F4 (Brothers/sisters of U.S. Citizens)</option>
         </select>
       </div>
       <div>
-        <label>出生国</label>
+        <label data-i18n="label_country">Country of Birth</label>
         <select id="s-country">
-          <option value="China" selected>中国大陆</option>
-          <option value="India">印度</option>
-          <option value="Mexico">墨西哥</option>
-          <option value="Philippines">菲律宾</option>
-          <option value="ROW">其他国家（ROW）</option>
+          <option value="China" data-i18n-opt="opt_china">China (Mainland)</option>
+          <option value="India" data-i18n-opt="opt_india">India</option>
+          <option value="Mexico" data-i18n-opt="opt_mexico">Mexico</option>
+          <option value="Philippines" data-i18n-opt="opt_phil">Philippines</option>
+          <option value="ROW" data-i18n-opt="opt_row">All Other Countries (ROW)</option>
         </select>
       </div>
       <div>
-        <label>我的 Priority Date</label>
+        <label data-i18n="label_pd">My Priority Date</label>
         <input type="date" id="s-pd">
       </div>
       <div>
-        <label>Chart 类型</label>
+        <label data-i18n="label_chart">Chart Type</label>
         <select id="s-chart">
-          <option value="A">Chart A（最终行动日期）</option>
-          <option value="B">Chart B（可递交日期）</option>
+          <option value="A" data-i18n-opt="opt_chart_a">Chart A – Final Action Dates</option>
+          <option value="B" data-i18n-opt="opt_chart_b">Chart B – Dates for Filing</option>
         </select>
       </div>
     </div>
     <div class="btn-row">
-      <button class="btn" onclick="saveAndCheck()">保存并检查</button>
+      <button class="btn" onclick="saveAndCheck()" data-i18n="btn_save">Save &amp; Check</button>
     </div>
   </div>
 
-  <!-- 我的状态 -->
+  <!-- Status -->
   <div id="my-status"></div>
 
-  <!-- 历史走势 -->
+  <!-- Trend chart -->
   <div class="card">
-    <div class="card-title">排期走势（历史）</div>
+    <div class="card-title" data-i18n="section_trend">Priority Date Trend</div>
     <div class="chart-box">
       <canvas id="trend-chart"></canvas>
-      <p id="chart-msg" class="msg">设置 Priority Date 后显示走势</p>
+      <p id="chart-msg" class="msg" data-i18n="chart_empty">Enter your priority date above to see the trend</p>
     </div>
   </div>
 
-  <!-- 当前排期总览 -->
+  <!-- Current bulletin overview -->
   <div class="card">
-    <div class="card-title">当前排期总览</div>
+    <div class="card-title" data-i18n="section_overview">Current Bulletin Overview</div>
     <div class="tabs">
-      <div class="tab on" id="tab-la" onclick="switchLatest('A')">Chart A</div>
-      <div class="tab" id="tab-lb" onclick="switchLatest('B')">Chart B</div>
+      <div class="tab on" id="tab-la" onclick="switchLatest('A')" data-i18n="tab_chart_a">Chart A – Final Action</div>
+      <div class="tab" id="tab-lb" onclick="switchLatest('B')" data-i18n="tab_chart_b">Chart B – Dates for Filing</div>
     </div>
     <div style="overflow-x:auto">
       <table class="tbl">
         <thead>
           <tr>
-            <th>类别</th><th>中国大陆</th><th>印度</th><th>墨西哥</th><th>菲律宾</th><th>其他</th>
+            <th data-i18n="th_category">Category</th>
+            <th data-i18n="th_china">China</th>
+            <th data-i18n="th_india">India</th>
+            <th data-i18n="th_mexico">Mexico</th>
+            <th data-i18n="th_phil">Philippines</th>
+            <th data-i18n="th_row">Other</th>
           </tr>
         </thead>
-        <tbody id="latest-body"><tr><td colspan="6" class="msg">加载中…</td></tr></tbody>
+        <tbody id="latest-body"><tr><td colspan="6" class="msg">...</td></tr></tbody>
       </table>
     </div>
     <p id="update-time"></p>
@@ -159,45 +203,249 @@
 
 </div>
 
-<script>
-// ---- 数据加载 ----
+<footer>
+  <span data-i18n="footer_source">Data source:</span>
+  <a href="https://travel.state.gov/content/travel/en/legal/visa-law0/visa-bulletin.html" target="_blank">
+    U.S. Department of State Visa Bulletin
+  </a>
+  &nbsp;·&nbsp;
+  <a href="https://github.com/ZhenWei-Shi/greencard-tracker" target="_blank">GitHub</a>
+</footer>
 
+<script>
+// ============================================================
+// i18n
+// ============================================================
+const I18N = {
+  en: {
+    title: "Green Card Priority Date Tracker",
+    section_profile: "My Priority Date",
+    label_category: "Visa Category",
+    label_country: "Country of Birth",
+    label_pd: "My Priority Date",
+    label_chart: "Chart Type",
+    btn_save: "Save & Check",
+    section_trend: "Priority Date Trend",
+    chart_empty: "Enter your priority date above to see the trend",
+    section_overview: "Current Bulletin Overview",
+    tab_chart_a: "Chart A – Final Action",
+    tab_chart_b: "Chart B – Dates for Filing",
+    th_category: "Category",
+    th_china: "China",
+    th_india: "India",
+    th_mexico: "Mexico",
+    th_phil: "Philippines",
+    th_row: "Other",
+    footer_source: "Data source:",
+    status_loading: "Loading…",
+    status_no_data: "No data yet — run the scraper first",
+    status_current: "You can file now!",
+    status_waiting: "Waiting",
+    status_unavailable: "Unavailable",
+    status_not_found: "No data found for this category/country",
+    status_cutoff: "Current cutoff date:",
+    status_gap: "Cutoff must advance ~{n} more months",
+    status_covered: "Your priority date is covered.",
+    version_prefix: "Data through",
+    updated_at: "Last updated:",
+    opt_f1: "F1 – Unmarried sons/daughters of U.S. Citizens",
+    opt_f2a: "F2A – Spouses/children of LPRs",
+    opt_f2b: "F2B – Unmarried sons/daughters of LPRs",
+    opt_f3: "F3 – Married sons/daughters of U.S. Citizens",
+    opt_f4: "F4 – Brothers/sisters of U.S. Citizens",
+    opt_china: "China (Mainland)",
+    opt_india: "India",
+    opt_mexico: "Mexico",
+    opt_phil: "Philippines",
+    opt_row: "All Other Countries (ROW)",
+    opt_chart_a: "Chart A – Final Action Dates",
+    opt_chart_b: "Chart B – Dates for Filing",
+    chart_label_cutoff: "Cutoff Date",
+    chart_label_my_pd: "My Priority Date",
+  },
+  zh: {
+    title: "绿卡排期追踪",
+    section_profile: "我的优先日期",
+    label_category: "签证类别",
+    label_country: "出生国",
+    label_pd: "我的 Priority Date",
+    label_chart: "Chart 类型",
+    btn_save: "保存并检查",
+    section_trend: "排期走势（历史）",
+    chart_empty: "填写优先日期后显示走势图",
+    section_overview: "当前排期总览",
+    tab_chart_a: "Chart A – 最终行动日期",
+    tab_chart_b: "Chart B – 可递交日期",
+    th_category: "类别",
+    th_china: "中国大陆",
+    th_india: "印度",
+    th_mexico: "墨西哥",
+    th_phil: "菲律宾",
+    th_row: "其他国家",
+    footer_source: "数据来源：",
+    status_loading: "加载中…",
+    status_no_data: "暂无数据，请先运行 Scraper",
+    status_current: "排期已到，可以递交！",
+    status_waiting: "等待中",
+    status_unavailable: "暂不开放（Unavailable）",
+    status_not_found: "未找到该类别/国家的数据",
+    status_cutoff: "当前截止日期：",
+    status_gap: "排期还需前进约 {n} 个月",
+    status_covered: "你的优先日期已覆盖。",
+    version_prefix: "数据至",
+    updated_at: "最后更新：",
+    opt_f1: "F1 – 公民的未婚成年子女",
+    opt_f2a: "F2A – 绿卡持有人的配偶/未成年子女",
+    opt_f2b: "F2B – 绿卡持有人的未婚成年子女",
+    opt_f3: "F3 – 公民的已婚成年子女",
+    opt_f4: "F4 – 公民的兄弟姐妹",
+    opt_china: "中国大陆",
+    opt_india: "印度",
+    opt_mexico: "墨西哥",
+    opt_phil: "菲律宾",
+    opt_row: "其他国家（ROW）",
+    opt_chart_a: "Chart A – 最终行动日期",
+    opt_chart_b: "Chart B – 可递交日期",
+    chart_label_cutoff: "排期截止日",
+    chart_label_my_pd: "我的 Priority Date",
+  },
+  es: {
+    title: "Seguimiento de Fecha Prioritaria (Green Card)",
+    section_profile: "Mi Fecha Prioritaria",
+    label_category: "Categoría de Visa",
+    label_country: "País de Nacimiento",
+    label_pd: "Mi Fecha Prioritaria",
+    label_chart: "Tipo de Tabla",
+    btn_save: "Guardar y Verificar",
+    section_trend: "Tendencia Histórica",
+    chart_empty: "Ingresa tu fecha prioritaria para ver la tendencia",
+    section_overview: "Resumen del Boletín Actual",
+    tab_chart_a: "Tabla A – Fechas de Acción Final",
+    tab_chart_b: "Tabla B – Fechas para Presentar",
+    th_category: "Categoría",
+    th_china: "China",
+    th_india: "India",
+    th_mexico: "México",
+    th_phil: "Filipinas",
+    th_row: "Otros",
+    footer_source: "Fuente de datos:",
+    status_loading: "Cargando…",
+    status_no_data: "Sin datos — ejecuta el scraper primero",
+    status_current: "¡Puedes presentar ahora!",
+    status_waiting: "En espera",
+    status_unavailable: "No disponible",
+    status_not_found: "No se encontraron datos para esta categoría/país",
+    status_cutoff: "Fecha de corte actual:",
+    status_gap: "La fecha de corte debe avanzar ~{n} meses más",
+    status_covered: "Tu fecha prioritaria ya está cubierta.",
+    version_prefix: "Datos hasta",
+    updated_at: "Última actualización:",
+    opt_f1: "F1 – Hijos/as solteros de ciudadanos",
+    opt_f2a: "F2A – Cónyuge/hijos de residentes permanentes",
+    opt_f2b: "F2B – Hijos/as solteros de residentes permanentes",
+    opt_f3: "F3 – Hijos/as casados de ciudadanos",
+    opt_f4: "F4 – Hermanos/as de ciudadanos",
+    opt_china: "China (Continental)",
+    opt_india: "India",
+    opt_mexico: "México",
+    opt_phil: "Filipinas",
+    opt_row: "Todos los demás países (ROW)",
+    opt_chart_a: "Tabla A – Fechas de Acción Final",
+    opt_chart_b: "Tabla B – Fechas para Presentar",
+    chart_label_cutoff: "Fecha de Corte",
+    chart_label_my_pd: "Mi Fecha Prioritaria",
+  },
+};
+
+let lang = localStorage.getItem("gc_lang") || "en";
+
+function t(key, vars) {
+  let s = (I18N[lang] || I18N.en)[key] || key;
+  if (vars) Object.entries(vars).forEach(([k, v]) => { s = s.replace(`{${k}}`, v); });
+  return s;
+}
+
+function applyLang() {
+  document.documentElement.lang = lang;
+  // static text nodes
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    el.textContent = t(el.dataset.i18n);
+  });
+  // select options
+  document.querySelectorAll("[data-i18n-opt]").forEach(el => {
+    el.textContent = t(el.dataset.i18nOpt);
+  });
+  // active lang button
+  document.querySelectorAll(".lang-btn").forEach(btn => {
+    btn.classList.toggle("active",
+      (btn.textContent === "EN" && lang === "en") ||
+      (btn.textContent === "中文" && lang === "zh") ||
+      (btn.textContent === "ES" && lang === "es")
+    );
+  });
+  // re-render dynamic parts
+  renderVersionBadge();
+  renderLatestTable();
+  const p = getProfile();
+  if (p.priority_date) {
+    renderMyStatus(p);
+    renderTrend(p);
+  }
+}
+
+function setLang(l) {
+  lang = l;
+  localStorage.setItem("gc_lang", l);
+  applyLang();
+}
+
+// ============================================================
+// Data
+// ============================================================
 const DATA = { index: null, bulletins: {} };
-const COUNTRIES = ["China","India","Mexico","Philippines","ROW"];
+const COUNTRIES = ["China", "India", "Mexico", "Philippines", "ROW"];
 let trendChart = null;
 let latestChartType = "A";
 
 async function loadIndex() {
   const res = await fetch("data/index.json?_=" + Date.now());
-  if (!res.ok) throw new Error("index.json 不存在，请先运行 scraper");
+  if (!res.ok) throw new Error("index.json not found");
   DATA.index = await res.json();
-  const latest = DATA.index.bulletins[0];
-  document.getElementById("data-version").textContent =
-    latest ? `数据至 ${latest.year}-${String(latest.month).padStart(2,"0")}` : "暂无数据";
-  document.getElementById("update-time").textContent =
-    "最后更新：" + (DATA.index.updated_at || "").replace("T"," ").slice(0,16) + " UTC";
 }
 
 async function getBulletin(year, month) {
-  const key = `${year}_${String(month).padStart(2,"0")}`;
+  const key = `${year}_${String(month).padStart(2, "0")}`;
   if (DATA.bulletins[key]) return DATA.bulletins[key];
   const res = await fetch(`data/bulletin_${key}.json`);
   if (!res.ok) return null;
-  const d = await res.json();
-  DATA.bulletins[key] = d;
-  return d;
+  DATA.bulletins[key] = await res.json();
+  return DATA.bulletins[key];
 }
 
 async function getLatestBulletin() {
-  if (!DATA.index || !DATA.index.bulletins.length) return null;
+  if (!DATA.index?.bulletins?.length) return null;
   const { year, month } = DATA.index.bulletins[0];
   return getBulletin(year, month);
 }
 
-// ---- 个人设置（localStorage）----
+function renderVersionBadge() {
+  if (!DATA.index?.bulletins?.length) return;
+  const { year, month } = DATA.index.bulletins[0];
+  document.getElementById("data-version").textContent =
+    `${t("version_prefix")} ${year}-${String(month).padStart(2, "0")}`;
+  const ut = (DATA.index.updated_at || "").replace("T", " ").slice(0, 16);
+  document.getElementById("update-time").textContent = ut ? `${t("updated_at")} ${ut} UTC` : "";
+}
 
-function loadProfile() {
-  const p = JSON.parse(localStorage.getItem("gc_profile") || "{}");
+// ============================================================
+// Profile (localStorage)
+// ============================================================
+function getProfile() {
+  return JSON.parse(localStorage.getItem("gc_profile") || "{}");
+}
+
+function loadProfileUI() {
+  const p = getProfile();
   if (p.category) document.getElementById("s-cat").value = p.category;
   if (p.country)  document.getElementById("s-country").value = p.country;
   if (p.priority_date) document.getElementById("s-pd").value = p.priority_date;
@@ -207,9 +455,9 @@ function loadProfile() {
 function saveProfile() {
   const p = {
     category: document.getElementById("s-cat").value,
-    country: document.getElementById("s-country").value,
+    country:  document.getElementById("s-country").value,
     priority_date: document.getElementById("s-pd").value,
-    chart: document.getElementById("s-chart").value,
+    chart:    document.getElementById("s-chart").value,
   };
   localStorage.setItem("gc_profile", JSON.stringify(p));
   return p;
@@ -221,8 +469,9 @@ async function saveAndCheck() {
   await renderTrend(p);
 }
 
-// ---- 个人状态 ----
-
+// ============================================================
+// Status card
+// ============================================================
 function dateDiffMonths(d1, d2) {
   try {
     return Math.round((new Date(d2) - new Date(d1)) / (1000 * 86400 * 30.44) * 10) / 10;
@@ -233,52 +482,50 @@ async function renderMyStatus(p) {
   const el = document.getElementById("my-status");
   if (!p.priority_date) { el.innerHTML = ""; return; }
 
-  const bulletin = await getLatestBulletin();
-  if (!bulletin) {
-    el.innerHTML = `<div class="status-box s-red"><div class="big">⚠️ 暂无数据</div><div class="detail">data/ 目录为空，请先手动运行 scraper 或触发 GitHub Actions</div></div>`;
+  const b = await getLatestBulletin();
+  if (!b) {
+    el.innerHTML = `<div class="status-box s-red"><div class="big">⚠️ ${t("status_no_data")}</div></div>`;
     return;
   }
 
   const chart_key = "chart_" + (p.chart || "A").toLowerCase();
-  const entries = bulletin[chart_key] || [];
-  const row = entries.find(e => e.category === p.category && e.country === p.country);
+  const row = (b[chart_key] || []).find(e => e.category === p.category && e.country === p.country);
 
   if (!row) {
-    el.innerHTML = `<div class="status-box s-yellow"><div class="big">❓ 未找到</div><div class="detail">类别 ${p.category} / 国家 ${p.country} 在此期 Bulletin 中无记录</div></div>`;
+    el.innerHTML = `<div class="status-box s-yellow"><div class="big">❓ ${t("status_not_found")}</div></div>`;
     return;
   }
 
   const cutoff = row.cutoff_date;
-  let cls = "s-yellow", icon = "⏳", label = "等待中";
-  let detail = `当前截止日期：<b>${cutoff || "不开放"}</b>`;
+  let cls = "s-yellow", icon = "⏳", label = t("status_waiting"), detail = "";
 
   if (cutoff === "Current") {
-    cls = "s-green"; icon = "✅"; label = "排期已到，可递交！";
-    detail += "　你的 Priority Date 已覆盖。";
+    cls = "s-green"; icon = "✅"; label = t("status_current");
+    detail = t("status_covered");
   } else if (!cutoff) {
-    cls = "s-red"; icon = "🚫"; label = "暂不开放（Unavailable）";
+    cls = "s-red"; icon = "🚫"; label = t("status_unavailable");
   } else {
     const gap = dateDiffMonths(p.priority_date, cutoff);
-    if (gap === null) { detail += "（日期解析错误）"; }
-    else if (gap <= 0) {
-      cls = "s-green"; icon = "✅"; label = "排期已到，可递交！";
-      detail += "　你的 Priority Date 已覆盖。";
-    } else {
-      detail += `　排期还需前进约 <b>${gap}</b> 个月。`;
+    if (gap !== null && gap <= 0) {
+      cls = "s-green"; icon = "✅"; label = t("status_current");
+      detail = t("status_covered");
+    } else if (gap !== null) {
+      detail = t("status_gap", { n: gap });
     }
   }
 
-  const yr = bulletin.year, mo = String(bulletin.month).padStart(2,"0");
+  const yr = b.year, mo = String(b.month).padStart(2, "0");
   el.innerHTML = `
     <div class="status-box ${cls}">
-      <div class="label">${p.category} · ${p.country} · Chart ${p.chart || "A"} · ${yr}-${mo} Bulletin</div>
+      <div class="lbl">${p.category} · ${p.country} · Chart ${p.chart || "A"} · ${yr}-${mo}</div>
       <div class="big">${icon} ${label}</div>
-      <div class="detail">${detail}</div>
+      <div class="detail">${t("status_cutoff")} <b>${cutoff || "—"}</b>${detail ? "　" + detail : ""}</div>
     </div>`;
 }
 
-// ---- 历史走势 ----
-
+// ============================================================
+// Trend chart
+// ============================================================
 async function renderTrend(p) {
   const msg = document.getElementById("chart-msg");
   if (!p.priority_date || !DATA.index) { msg.style.display = "block"; return; }
@@ -291,20 +538,17 @@ async function renderTrend(p) {
     if (!b) continue;
     const row = (b[chart_key] || []).find(e => e.category === p.category && e.country === p.country);
     history.push({
-      label: `${item.year}-${String(item.month).padStart(2,"0")}`,
+      label: `${item.year}-${String(item.month).padStart(2, "0")}`,
       value: row?.cutoff_date && row.cutoff_date !== "Current" ? new Date(row.cutoff_date).getTime() : null,
-      is_current: row?.cutoff_date === "Current",
     });
   }
 
   msg.style.display = history.length ? "none" : "block";
   if (!history.length) return;
 
+  const pdMs = new Date(p.priority_date).getTime();
   const ctx = document.getElementById("trend-chart").getContext("2d");
   if (trendChart) trendChart.destroy();
-
-  // Priority Date 参考线
-  const pdMs = new Date(p.priority_date).getTime();
 
   trendChart = new Chart(ctx, {
     type: "line",
@@ -312,7 +556,7 @@ async function renderTrend(p) {
       labels: history.map(h => h.label),
       datasets: [
         {
-          label: "排期截止日",
+          label: t("chart_label_cutoff"),
           data: history.map(h => h.value),
           borderColor: "#2e7d32",
           backgroundColor: "rgba(46,125,50,0.07)",
@@ -321,7 +565,7 @@ async function renderTrend(p) {
           fill: true,
         },
         {
-          label: "我的 Priority Date",
+          label: t("chart_label_my_pd"),
           data: history.map(() => pdMs),
           borderColor: "#f57f17",
           borderDash: [5, 4],
@@ -336,15 +580,13 @@ async function renderTrend(p) {
       maintainAspectRatio: false,
       scales: {
         y: {
-          ticks: {
-            callback: v => v ? new Date(v).toISOString().slice(0,7) : ""
-          }
+          ticks: { callback: v => v ? new Date(v).toISOString().slice(0, 7) : "" }
         }
       },
       plugins: {
         tooltip: {
           callbacks: {
-            label: c => c.raw ? new Date(c.raw).toISOString().slice(0,10) : "不开放 / Current"
+            label: c => c.raw ? new Date(c.raw).toISOString().slice(0, 10) : "—"
           }
         }
       }
@@ -352,8 +594,9 @@ async function renderTrend(p) {
   });
 }
 
-// ---- 总览表格 ----
-
+// ============================================================
+// Overview table
+// ============================================================
 function switchLatest(type) {
   latestChartType = type;
   document.getElementById("tab-la").classList.toggle("on", type === "A");
@@ -365,7 +608,7 @@ async function renderLatestTable() {
   const tbody = document.getElementById("latest-body");
   const b = await getLatestBulletin();
   if (!b) {
-    tbody.innerHTML = `<tr><td colspan="6" class="msg">暂无数据</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" class="msg">${t("status_no_data")}</td></tr>`;
     return;
   }
 
@@ -387,26 +630,29 @@ async function renderLatestTable() {
     return `<tr><td><b>${cat}</b></td>${cells}</tr>`;
   }).join("");
 
-  tbody.innerHTML = rows || `<tr><td colspan="6" class="msg">无数据</td></tr>`;
+  tbody.innerHTML = rows || `<tr><td colspan="6" class="msg">—</td></tr>`;
 }
 
-// ---- 初始化 ----
+// ============================================================
+// Init
+// ============================================================
 (async () => {
-  loadProfile();
+  loadProfileUI();
+  applyLang();
   try {
     await loadIndex();
+    renderVersionBadge();
     await renderLatestTable();
-    const p = JSON.parse(localStorage.getItem("gc_profile") || "{}");
+    const p = getProfile();
     if (p.priority_date) {
       await renderMyStatus(p);
       await renderTrend(p);
     }
   } catch (e) {
-    document.getElementById("data-version").textContent = "⚠️ 暂无数据";
+    document.getElementById("data-version").textContent = "⚠️";
     console.warn(e);
   }
 })();
 </script>
-
 </body>
 </html>
