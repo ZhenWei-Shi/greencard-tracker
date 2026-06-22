@@ -29,7 +29,97 @@
       "year": 2026,
       "month": 2,
       "file": "bulletin_2026_02.json"
+    },
+    {
+      "year": 2026,
+      "month": 1,
+      "file": "bulletin_2026_01.json"
+    },
+    {
+      "year": 2025,
+      "month": 12,
+      "file": "bulletin_2025_12.json"
+    },
+    {
+      "year": 2025,
+      "month": 11,
+      "file": "bulletin_2025_11.json"
+    },
+    {
+      "year": 2025,
+      "month": 10,
+      "file": "bulletin_2025_10.json"
+    },
+    {
+      "year": 2025,
+      "month": 9,
+      "file": "bulletin_2025_09.json"
+    },
+    {
+      "year": 2025,
+      "month": 8,
+      "file": "bulletin_2025_08.json"
+    },
+    {
+      "year": 2025,
+      "month": 7,
+      "file": "bulletin_2025_07.json"
+    },
+    {
+      "year": 2025,
+      "month": 6,
+      "file": "bulletin_2025_06.json"
+    },
+    {
+      "year": 2025,
+      "month": 5,
+      "file": "bulletin_2025_05.json"
+    },
+    {
+      "year": 2025,
+      "month": 4,
+      "file": "bulletin_2025_04.json"
+    },
+    {
+      "year": 2025,
+      "month": 3,
+      "file": "bulletin_2025_03.json"
+    },
+    {
+      "year": 2025,
+      "month": 2,
+      "file": "bulletin_2025_02.json"
+    },
+    {
+      "year": 2025,
+      "month": 1,
+      "file": "bulletin_2025_01.json"
+    },
+    {
+      "year": 2024,
+      "month": 12,
+      "file": "bulletin_2024_12.json"
+    },
+    {
+      "year": 2024,
+      "month": 11,
+      "file": "bulletin_2024_11.json"
+    },
+    {
+      "year": 2024,
+      "month": 10,
+      "file": "bulletin_2024_10.json"
+    },
+    {
+      "year": 2024,
+      "month": 9,
+      "file": "bulletin_2024_09.json"
+    },
+    {
+      "year": 2024,
+      "month": 8,
+      "file": "bulletin_2024_08.json"
     }
   ],
-  "updated_at": "2026-06-22T23:34:06.534992+00:00"
+  "updated_at": "2026-06-22T23:42:45.066291+00:00"
 }

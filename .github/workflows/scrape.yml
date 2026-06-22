@@ -2,7 +2,7 @@ name: Scrape Visa Bulletin
 
 on:
   schedule:
-    - cron: "0 18 10,15,20,25,30 * *"
+    - cron: "0 18 17,22,27,30 * *"
   workflow_dispatch:
     inputs:
       history:

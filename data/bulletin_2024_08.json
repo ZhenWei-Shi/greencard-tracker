@@ -1,0 +1,759 @@
+{
+  "year": 2024,
+  "month": 8,
+  "url": "https://travel.state.gov/content/travel/en/legal/visa-law0/visa-bulletin/2024/visa-bulletin-for-august-2024.html",
+  "chart_a": [
+    {
+      "category": "F1",
+      "country": "ROW",
+      "cutoff_date": "2015-10-22"
+    },
+    {
+      "category": "F1",
+      "country": "China",
+      "cutoff_date": "2015-10-22"
+    },
+    {
+      "category": "F1",
+      "country": "India",
+      "cutoff_date": "2015-10-22"
+    },
+    {
+      "category": "F1",
+      "country": "Mexico",
+      "cutoff_date": "2002-05-08"
+    },
+    {
+      "category": "F1",
+      "country": "Philippines",
+      "cutoff_date": "2012-03-01"
+    },
+    {
+      "category": "F2A",
+      "country": "ROW",
+      "cutoff_date": "2021-11-15"
+    },
+    {
+      "category": "F2A",
+      "country": "China",
+      "cutoff_date": "2021-11-15"
+    },
+    {
+      "category": "F2A",
+      "country": "India",
+      "cutoff_date": "2021-11-15"
+    },
+    {
+      "category": "F2A",
+      "country": "Mexico",
+      "cutoff_date": "2021-02-01"
+    },
+    {
+      "category": "F2A",
+      "country": "Philippines",
+      "cutoff_date": "2021-11-15"
+    },
+    {
+      "category": "F2B",
+      "country": "ROW",
+      "cutoff_date": "2016-05-01"
+    },
+    {
+      "category": "F2B",
+      "country": "China",
+      "cutoff_date": "2016-05-01"
+    },
+    {
+      "category": "F2B",
+      "country": "India",
+      "cutoff_date": "2016-05-01"
+    },
+    {
+      "category": "F2B",
+      "country": "Mexico",
+      "cutoff_date": "2004-07-15"
+    },
+    {
+      "category": "F2B",
+      "country": "Philippines",
+      "cutoff_date": "2011-10-22"
+    },
+    {
+      "category": "F3",
+      "country": "ROW",
+      "cutoff_date": "2010-04-01"
+    },
+    {
+      "category": "F3",
+      "country": "China",
+      "cutoff_date": "2010-04-01"
+    },
+    {
+      "category": "F3",
+      "country": "India",
+      "cutoff_date": "2010-04-01"
+    },
+    {
+      "category": "F3",
+      "country": "Mexico",
+      "cutoff_date": "2000-03-01"
+    },
+    {
+      "category": "F3",
+      "country": "Philippines",
+      "cutoff_date": "2002-09-08"
+    },
+    {
+      "category": "F4",
+      "country": "ROW",
+      "cutoff_date": "2007-08-01"
+    },
+    {
+      "category": "F4",
+      "country": "China",
+      "cutoff_date": "2007-08-01"
+    },
+    {
+      "category": "F4",
+      "country": "India",
+      "cutoff_date": "2006-01-22"
+    },
+    {
+      "category": "F4",
+      "country": "Mexico",
+      "cutoff_date": "2001-02-08"
+    },
+    {
+      "category": "F4",
+      "country": "Philippines",
+      "cutoff_date": "2004-02-01"
+    },
+    {
+      "category": "EB1",
+      "country": "ROW",
+      "cutoff_date": "Current"
+    },
+    {
+      "category": "EB1",
+      "country": "China",
+      "cutoff_date": "2022-11-01"
+    },
+    {
+      "category": "EB1",
+      "country": "India",
+      "cutoff_date": "2022-02-01"
+    },
+    {
+      "category": "EB1",
+      "country": "Mexico",
+      "cutoff_date": "Current"
+    },
+    {
+      "category": "EB1",
+      "country": "Philippines",
+      "cutoff_date": "Current"
+    },
+    {
+      "category": "EB2",
+      "country": "ROW",
+      "cutoff_date": "2023-03-15"
+    },
+    {
+      "category": "EB2",
+      "country": "China",
+      "cutoff_date": "2020-03-01"
+    },
+    {
+      "category": "EB2",
+      "country": "India",
+      "cutoff_date": "2012-07-15"
+    },
+    {
+      "category": "EB2",
+      "country": "Mexico",
+      "cutoff_date": "2023-03-15"
+    },
+    {
+      "category": "EB2",
+      "country": "Philippines",
+      "cutoff_date": "2023-03-15"
+    },
+    {
+      "category": "EB3",
+      "country": "ROW",
+      "cutoff_date": "2021-12-01"
+    },
+    {
+      "category": "EB3",
+      "country": "China",
+      "cutoff_date": "2020-09-01"
+    },
+    {
+      "category": "EB3",
+      "country": "India",
+      "cutoff_date": "2012-10-22"
+    },
+    {
+      "category": "EB3",
+      "country": "Mexico",
+      "cutoff_date": "2021-12-01"
+    },
+    {
+      "category": "EB3",
+      "country": "Philippines",
+      "cutoff_date": "2021-12-01"
+    },
+    {
+      "category": "EB3-OW",
+      "country": "ROW",
+      "cutoff_date": "2021-01-01"
+    },
+    {
+      "category": "EB3-OW",
+      "country": "China",
+      "cutoff_date": "2017-01-01"
+    },
+    {
+      "category": "EB3-OW",
+      "country": "India",
+      "cutoff_date": "2012-10-22"
+    },
+    {
+      "category": "EB3-OW",
+      "country": "Mexico",
+      "cutoff_date": "2021-01-01"
+    },
+    {
+      "category": "EB3-OW",
+      "country": "Philippines",
+      "cutoff_date": "2020-05-01"
+    },
+    {
+      "category": "EB4",
+      "country": "ROW",
+      "cutoff_date": "2021-01-01"
+    },
+    {
+      "category": "EB4",
+      "country": "China",
+      "cutoff_date": "2021-01-01"
+    },
+    {
+      "category": "EB4",
+      "country": "India",
+      "cutoff_date": "2021-01-01"
+    },
+    {
+      "category": "EB4",
+      "country": "Mexico",
+      "cutoff_date": "2021-01-01"
+    },
+    {
+      "category": "EB4",
+      "country": "Philippines",
+      "cutoff_date": "2021-01-01"
+    },
+    {
+      "category": "EB4-R",
+      "country": "ROW",
+      "cutoff_date": "2021-01-01"
+    },
+    {
+      "category": "EB4-R",
+      "country": "China",
+      "cutoff_date": "2021-01-01"
+    },
+    {
+      "category": "EB4-R",
+      "country": "India",
+      "cutoff_date": "2021-01-01"
+    },
+    {
+      "category": "EB4-R",
+      "country": "Mexico",
+      "cutoff_date": "2021-01-01"
+    },
+    {
+      "category": "EB4-R",
+      "country": "Philippines",
+      "cutoff_date": "2021-01-01"
+    },
+    {
+      "category": "EB5",
+      "country": "ROW",
+      "cutoff_date": "Current"
+    },
+    {
+      "category": "EB5",
+      "country": "China",
+      "cutoff_date": "2015-12-15"
+    },
+    {
+      "category": "EB5",
+      "country": "India",
+      "cutoff_date": "2020-12-01"
+    },
+    {
+      "category": "EB5",
+      "country": "Mexico",
+      "cutoff_date": "Current"
+    },
+    {
+      "category": "EB5",
+      "country": "Philippines",
+      "cutoff_date": "Current"
+    },
+    {
+      "category": "EB5",
+      "country": "ROW",
+      "cutoff_date": "Current"
+    },
+    {
+      "category": "EB5",
+      "country": "China",
+      "cutoff_date": "Current"
+    },
+    {
+      "category": "EB5",
+      "country": "India",
+      "cutoff_date": "Current"
+    },
+    {
+      "category": "EB5",
+      "country": "Mexico",
+      "cutoff_date": "Current"
+    },
+    {
+      "category": "EB5",
+      "country": "Philippines",
+      "cutoff_date": "Current"
+    },
+    {
+      "category": "EB5",
+      "country": "ROW",
+      "cutoff_date": "Current"
+    },
+    {
+      "category": "EB5",
+      "country": "China",
+      "cutoff_date": "Current"
+    },
+    {
+      "category": "EB5",
+      "country": "India",
+      "cutoff_date": "Current"
+    },
+    {
+      "category": "EB5",
+      "country": "Mexico",
+      "cutoff_date": "Current"
+    },
+    {
+      "category": "EB5",
+      "country": "Philippines",
+      "cutoff_date": "Current"
+    },
+    {
+      "category": "EB5",
+      "country": "ROW",
+      "cutoff_date": "Current"
+    },
+    {
+      "category": "EB5",
+      "country": "China",
+      "cutoff_date": "Current"
+    },
+    {
+      "category": "EB5",
+      "country": "India",
+      "cutoff_date": "Current"
+    },
+    {
+      "category": "EB5",
+      "country": "Mexico",
+      "cutoff_date": "Current"
+    },
+    {
+      "category": "EB5",
+      "country": "Philippines",
+      "cutoff_date": "Current"
+    }
+  ],
+  "chart_b": [
+    {
+      "category": "F1",
+      "country": "ROW",
+      "cutoff_date": "2017-09-01"
+    },
+    {
+      "category": "F1",
+      "country": "China",
+      "cutoff_date": "2017-09-01"
+    },
+    {
+      "category": "F1",
+      "country": "India",
+      "cutoff_date": "2017-09-01"
+    },
+    {
+      "category": "F1",
+      "country": "Mexico",
+      "cutoff_date": "2005-04-01"
+    },
+    {
+      "category": "F1",
+      "country": "Philippines",
+      "cutoff_date": "2015-04-22"
+    },
+    {
+      "category": "F2A",
+      "country": "ROW",
+      "cutoff_date": "2024-06-15"
+    },
+    {
+      "category": "F2A",
+      "country": "China",
+      "cutoff_date": "2024-06-15"
+    },
+    {
+      "category": "F2A",
+      "country": "India",
+      "cutoff_date": "2024-06-15"
+    },
+    {
+      "category": "F2A",
+      "country": "Mexico",
+      "cutoff_date": "2024-06-15"
+    },
+    {
+      "category": "F2A",
+      "country": "Philippines",
+      "cutoff_date": "2024-06-15"
+    },
+    {
+      "category": "F2B",
+      "country": "ROW",
+      "cutoff_date": "2017-01-01"
+    },
+    {
+      "category": "F2B",
+      "country": "China",
+      "cutoff_date": "2017-01-01"
+    },
+    {
+      "category": "F2B",
+      "country": "India",
+      "cutoff_date": "2017-01-01"
+    },
+    {
+      "category": "F2B",
+      "country": "Mexico",
+      "cutoff_date": "2005-05-01"
+    },
+    {
+      "category": "F2B",
+      "country": "Philippines",
+      "cutoff_date": "2013-10-01"
+    },
+    {
+      "category": "F3",
+      "country": "ROW",
+      "cutoff_date": "2011-01-01"
+    },
+    {
+      "category": "F3",
+      "country": "China",
+      "cutoff_date": "2011-01-01"
+    },
+    {
+      "category": "F3",
+      "country": "India",
+      "cutoff_date": "2011-01-01"
+    },
+    {
+      "category": "F3",
+      "country": "Mexico",
+      "cutoff_date": "2001-06-15"
+    },
+    {
+      "category": "F3",
+      "country": "Philippines",
+      "cutoff_date": "2003-11-08"
+    },
+    {
+      "category": "F4",
+      "country": "ROW",
+      "cutoff_date": "2008-03-01"
+    },
+    {
+      "category": "F4",
+      "country": "China",
+      "cutoff_date": "2008-03-01"
+    },
+    {
+      "category": "F4",
+      "country": "India",
+      "cutoff_date": "2006-06-15"
+    },
+    {
+      "category": "F4",
+      "country": "Mexico",
+      "cutoff_date": "2001-04-30"
+    },
+    {
+      "category": "F4",
+      "country": "Philippines",
+      "cutoff_date": "2006-04-01"
+    },
+    {
+      "category": "EB1",
+      "country": "ROW",
+      "cutoff_date": "Current"
+    },
+    {
+      "category": "EB1",
+      "country": "China",
+      "cutoff_date": "2023-01-01"
+    },
+    {
+      "category": "EB1",
+      "country": "India",
+      "cutoff_date": "2022-02-08"
+    },
+    {
+      "category": "EB1",
+      "country": "Mexico",
+      "cutoff_date": "Current"
+    },
+    {
+      "category": "EB1",
+      "country": "Philippines",
+      "cutoff_date": "Current"
+    },
+    {
+      "category": "EB2",
+      "country": "ROW",
+      "cutoff_date": "2023-03-22"
+    },
+    {
+      "category": "EB2",
+      "country": "China",
+      "cutoff_date": "2020-06-01"
+    },
+    {
+      "category": "EB2",
+      "country": "India",
+      "cutoff_date": "2012-07-22"
+    },
+    {
+      "category": "EB2",
+      "country": "Mexico",
+      "cutoff_date": "2023-03-22"
+    },
+    {
+      "category": "EB2",
+      "country": "Philippines",
+      "cutoff_date": "2023-03-22"
+    },
+    {
+      "category": "EB3",
+      "country": "ROW",
+      "cutoff_date": "2023-02-01"
+    },
+    {
+      "category": "EB3",
+      "country": "China",
+      "cutoff_date": "2021-07-01"
+    },
+    {
+      "category": "EB3",
+      "country": "India",
+      "cutoff_date": "2012-11-01"
+    },
+    {
+      "category": "EB3",
+      "country": "Mexico",
+      "cutoff_date": "2023-02-01"
+    },
+    {
+      "category": "EB3",
+      "country": "Philippines",
+      "cutoff_date": "2023-01-01"
+    },
+    {
+      "category": "EB3-OW",
+      "country": "ROW",
+      "cutoff_date": "2021-01-08"
+    },
+    {
+      "category": "EB3-OW",
+      "country": "China",
+      "cutoff_date": "2017-06-01"
+    },
+    {
+      "category": "EB3-OW",
+      "country": "India",
+      "cutoff_date": "2012-11-01"
+    },
+    {
+      "category": "EB3-OW",
+      "country": "Mexico",
+      "cutoff_date": "2021-01-08"
+    },
+    {
+      "category": "EB3-OW",
+      "country": "Philippines",
+      "cutoff_date": "2020-05-15"
+    },
+    {
+      "category": "EB4",
+      "country": "ROW",
+      "cutoff_date": "2021-02-01"
+    },
+    {
+      "category": "EB4",
+      "country": "China",
+      "cutoff_date": "2021-02-01"
+    },
+    {
+      "category": "EB4",
+      "country": "India",
+      "cutoff_date": "2021-02-01"
+    },
+    {
+      "category": "EB4",
+      "country": "Mexico",
+      "cutoff_date": "2021-02-01"
+    },
+    {
+      "category": "EB4",
+      "country": "Philippines",
+      "cutoff_date": "2021-02-01"
+    },
+    {
+      "category": "EB4-R",
+      "country": "ROW",
+      "cutoff_date": "2021-02-01"
+    },
+    {
+      "category": "EB4-R",
+      "country": "China",
+      "cutoff_date": "2021-02-01"
+    },
+    {
+      "category": "EB4-R",
+      "country": "India",
+      "cutoff_date": "2021-02-01"
+    },
+    {
+      "category": "EB4-R",
+      "country": "Mexico",
+      "cutoff_date": "2021-02-01"
+    },
+    {
+      "category": "EB4-R",
+      "country": "Philippines",
+      "cutoff_date": "2021-02-01"
+    },
+    {
+      "category": "EB5",
+      "country": "ROW",
+      "cutoff_date": "Current"
+    },
+    {
+      "category": "EB5",
+      "country": "China",
+      "cutoff_date": "2017-01-01"
+    },
+    {
+      "category": "EB5",
+      "country": "India",
+      "cutoff_date": "2022-04-01"
+    },
+    {
+      "category": "EB5",
+      "country": "Mexico",
+      "cutoff_date": "Current"
+    },
+    {
+      "category": "EB5",
+      "country": "Philippines",
+      "cutoff_date": "Current"
+    },
+    {
+      "category": "EB5",
+      "country": "ROW",
+      "cutoff_date": "Current"
+    },
+    {
+      "category": "EB5",
+      "country": "China",
+      "cutoff_date": "Current"
+    },
+    {
+      "category": "EB5",
+      "country": "India",
+      "cutoff_date": "Current"
+    },
+    {
+      "category": "EB5",
+      "country": "Mexico",
+      "cutoff_date": "Current"
+    },
+    {
+      "category": "EB5",
+      "country": "Philippines",
+      "cutoff_date": "Current"
+    },
+    {
+      "category": "EB5",
+      "country": "ROW",
+      "cutoff_date": "Current"
+    },
+    {
+      "category": "EB5",
+      "country": "China",
+      "cutoff_date": "Current"
+    },
+    {
+      "category": "EB5",
+      "country": "India",
+      "cutoff_date": "Current"
+    },
+    {
+      "category": "EB5",
+      "country": "Mexico",
+      "cutoff_date": "Current"
+    },
+    {
+      "category": "EB5",
+      "country": "Philippines",
+      "cutoff_date": "Current"
+    },
+    {
+      "category": "EB5",
+      "country": "ROW",
+      "cutoff_date": "Current"
+    },
+    {
+      "category": "EB5",
+      "country": "China",
+      "cutoff_date": "Current"
+    },
+    {
+      "category": "EB5",
+      "country": "India",
+      "cutoff_date": "Current"
+    },
+    {
+      "category": "EB5",
+      "country": "Mexico",
+      "cutoff_date": "Current"
+    },
+    {
+      "category": "EB5",
+      "country": "Philippines",
+      "cutoff_date": "Current"
+    }
+  ]
+}
