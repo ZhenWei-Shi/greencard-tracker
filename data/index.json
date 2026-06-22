@@ -1,0 +1,35 @@
+{
+  "bulletins": [
+    {
+      "year": 2026,
+      "month": 7,
+      "file": "bulletin_2026_07.json"
+    },
+    {
+      "year": 2026,
+      "month": 6,
+      "file": "bulletin_2026_06.json"
+    },
+    {
+      "year": 2026,
+      "month": 5,
+      "file": "bulletin_2026_05.json"
+    },
+    {
+      "year": 2026,
+      "month": 4,
+      "file": "bulletin_2026_04.json"
+    },
+    {
+      "year": 2026,
+      "month": 3,
+      "file": "bulletin_2026_03.json"
+    },
+    {
+      "year": 2026,
+      "month": 2,
+      "file": "bulletin_2026_02.json"
+    }
+  ],
+  "updated_at": "2026-06-22T23:17:21.014011+00:00"
+}

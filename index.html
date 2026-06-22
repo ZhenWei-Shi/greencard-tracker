@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>绿卡排期追踪</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --green: #2e7d32;
+      --green-light: #e8f5e9;
+      --yellow: #f57f17;
+      --yellow-light: #fff8e1;
+      --red: #c62828;
+      --red-light: #ffebee;
+      --gray: #546e7a;
+      --bg: #f5f7fa;
+      --card: #ffffff;
+      --border: #e0e0e0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: #263238; }
+
+    header { background: var(--green); color: #fff; padding: 14px 20px; display: flex; align-items: center; gap: 10px; }
+    header h1 { font-size: 1.15rem; font-weight: 600; }
+    header small { background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 12px; font-size: 0.72rem; }
+
+    .container { max-width: 900px; margin: 0 auto; padding: 18px 14px; }
+
+    .card { background: var(--card); border-radius: 12px; border: 1px solid var(--border); padding: 18px; margin-bottom: 14px; }
+    .card-title { font-size: 0.78rem; font-weight: 700; color: var(--gray); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 14px; }
+
+    .status-box { border-radius: 10px; padding: 16px; margin-bottom: 14px; border-left: 5px solid; }
+    .s-green { background: var(--green-light); border-color: var(--green); }
+    .s-yellow { background: var(--yellow-light); border-color: var(--yellow); }
+    .s-red { background: var(--red-light); border-color: var(--red); }
+    .status-box .label { font-size: 0.8rem; color: var(--gray); margin-bottom: 4px; }
+    .status-box .big { font-size: 1.65rem; font-weight: 700; }
+    .status-box .detail { font-size: 0.88rem; margin-top: 5px; color: #444; }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    @media(max-width:480px){ .form-row { grid-template-columns: 1fr; } }
+    label { display: block; font-size: 0.78rem; color: var(--gray); font-weight: 600; margin-bottom: 3px; }
+    select, input[type=date], input[type=number] {
+      width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 7px;
+      font-size: 0.9rem; background: #fafafa;
+    }
+    select:focus, input:focus { outline: none; border-color: var(--green); }
+
+    .btn { background: var(--green); color: #fff; border: none; padding: 9px 18px; border-radius: 7px; font-size: 0.9rem; cursor: pointer; font-weight: 600; }
+    .btn:hover { opacity: .87; }
+    .btn-gray { background: var(--gray); }
+    .btn-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 12px; }
+
+    .tabs { display: flex; gap: 6px; margin-bottom: 12px; }
+    .tab { padding: 5px 14px; border-radius: 18px; border: 1px solid var(--border); cursor: pointer; font-size: 0.84rem; background: #fff; }
+    .tab.on { background: var(--green); color: #fff; border-color: var(--green); }
+
+    .chart-box { height: 260px; position: relative; }
+
+    .tbl { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
+    .tbl th { background: #f0f4f8; padding: 7px 10px; text-align: left; font-size: 0.75rem; font-weight: 700; color: var(--gray); border-bottom: 2px solid var(--border); }
+    .tbl td { padding: 7px 10px; border-bottom: 1px solid #f5f5f5; }
+    .tbl tr:last-child td { border: none; }
+    .tag-c { background: #c8e6c9; color: #1b5e20; padding: 1px 7px; border-radius: 9px; font-size: 0.75rem; font-weight: 700; }
+    .tag-u { background: #fce4ec; color: #880e4f; padding: 1px 7px; border-radius: 9px; font-size: 0.75rem; }
+
+    .msg { text-align: center; color: #aaa; padding: 28px 0; font-size: 0.88rem; }
+    #update-time { font-size: 0.75rem; color: #aaa; margin-top: 6px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <span style="font-size:1.4rem">🇺🇸</span>
+  <h1>绿卡排期追踪</h1>
+  <small id="data-version">加载中…</small>
+</header>
+
+<div class="container">
+
+  <!-- 个人设置 -->
+  <div class="card">
+    <div class="card-title">我的 Priority Date</div>
+    <div class="form-row">
+      <div>
+        <label>签证类别</label>
+        <select id="s-cat">
+          <option value="EB1">EB-1</option>
+          <option value="EB2" selected>EB-2</option>
+          <option value="EB3">EB-3</option>
+          <option value="EB4">EB-4</option>
+          <option value="EB5">EB-5</option>
+          <option value="F1">F1（配偶/子女）</option>
+          <option value="F2A">F2A</option>
+          <option value="F2B">F2B</option>
+          <option value="F3">F3</option>
+          <option value="F4">F4</option>
+        </select>
+      </div>
+      <div>
+        <label>出生国</label>
+        <select id="s-country">
+          <option value="China" selected>中国大陆</option>
+          <option value="India">印度</option>
+          <option value="Mexico">墨西哥</option>
+          <option value="Philippines">菲律宾</option>
+          <option value="ROW">其他国家（ROW）</option>
+        </select>
+      </div>
+      <div>
+        <label>我的 Priority Date</label>
+        <input type="date" id="s-pd">
+      </div>
+      <div>
+        <label>Chart 类型</label>
+        <select id="s-chart">
+          <option value="A">Chart A（最终行动日期）</option>
+          <option value="B">Chart B（可递交日期）</option>
+        </select>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn" onclick="saveAndCheck()">保存并检查</button>
+    </div>
+  </div>
+
+  <!-- 我的状态 -->
+  <div id="my-status"></div>
+
+  <!-- 历史走势 -->
+  <div class="card">
+    <div class="card-title">排期走势（历史）</div>
+    <div class="chart-box">
+      <canvas id="trend-chart"></canvas>
+      <p id="chart-msg" class="msg">设置 Priority Date 后显示走势</p>
+    </div>
+  </div>
+
+  <!-- 当前排期总览 -->
+  <div class="card">
+    <div class="card-title">当前排期总览</div>
+    <div class="tabs">
+      <div class="tab on" id="tab-la" onclick="switchLatest('A')">Chart A</div>
+      <div class="tab" id="tab-lb" onclick="switchLatest('B')">Chart B</div>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>类别</th><th>中国大陆</th><th>印度</th><th>墨西哥</th><th>菲律宾</th><th>其他</th>
+          </tr>
+        </thead>
+        <tbody id="latest-body"><tr><td colspan="6" class="msg">加载中…</td></tr></tbody>
+      </table>
+    </div>
+    <p id="update-time"></p>
+  </div>
+
+</div>
+
+<script>
+// ---- 数据加载 ----
+
+const DATA = { index: null, bulletins: {} };
+const COUNTRIES = ["China","India","Mexico","Philippines","ROW"];
+let trendChart = null;
+let latestChartType = "A";
+
+async function loadIndex() {
+  const res = await fetch("data/index.json?_=" + Date.now());
+  if (!res.ok) throw new Error("index.json 不存在，请先运行 scraper");
+  DATA.index = await res.json();
+  const latest = DATA.index.bulletins[0];
+  document.getElementById("data-version").textContent =
+    latest ? `数据至 ${latest.year}-${String(latest.month).padStart(2,"0")}` : "暂无数据";
+  document.getElementById("update-time").textContent =
+    "最后更新：" + (DATA.index.updated_at || "").replace("T"," ").slice(0,16) + " UTC";
+}
+
+async function getBulletin(year, month) {
+  const key = `${year}_${String(month).padStart(2,"0")}`;
+  if (DATA.bulletins[key]) return DATA.bulletins[key];
+  const res = await fetch(`data/bulletin_${key}.json`);
+  if (!res.ok) return null;
+  const d = await res.json();
+  DATA.bulletins[key] = d;
+  return d;
+}
+
+async function getLatestBulletin() {
+  if (!DATA.index || !DATA.index.bulletins.length) return null;
+  const { year, month } = DATA.index.bulletins[0];
+  return getBulletin(year, month);
+}
+
+// ---- 个人设置（localStorage）----
+
+function loadProfile() {
+  const p = JSON.parse(localStorage.getItem("gc_profile") || "{}");
+  if (p.category) document.getElementById("s-cat").value = p.category;
+  if (p.country)  document.getElementById("s-country").value = p.country;
+  if (p.priority_date) document.getElementById("s-pd").value = p.priority_date;
+  if (p.chart)    document.getElementById("s-chart").value = p.chart;
+}
+
+function saveProfile() {
+  const p = {
+    category: document.getElementById("s-cat").value,
+    country: document.getElementById("s-country").value,
+    priority_date: document.getElementById("s-pd").value,
+    chart: document.getElementById("s-chart").value,
+  };
+  localStorage.setItem("gc_profile", JSON.stringify(p));
+  return p;
+}
+
+async function saveAndCheck() {
+  const p = saveProfile();
+  await renderMyStatus(p);
+  await renderTrend(p);
+}
+
+// ---- 个人状态 ----
+
+function dateDiffMonths(d1, d2) {
+  try {
+    return Math.round((new Date(d2) - new Date(d1)) / (1000 * 86400 * 30.44) * 10) / 10;
+  } catch { return null; }
+}
+
+async function renderMyStatus(p) {
+  const el = document.getElementById("my-status");
+  if (!p.priority_date) { el.innerHTML = ""; return; }
+
+  const bulletin = await getLatestBulletin();
+  if (!bulletin) {
+    el.innerHTML = `<div class="status-box s-red"><div class="big">⚠️ 暂无数据</div><div class="detail">data/ 目录为空，请先手动运行 scraper 或触发 GitHub Actions</div></div>`;
+    return;
+  }
+
+  const chart_key = "chart_" + (p.chart || "A").toLowerCase();
+  const entries = bulletin[chart_key] || [];
+  const row = entries.find(e => e.category === p.category && e.country === p.country);
+
+  if (!row) {
+    el.innerHTML = `<div class="status-box s-yellow"><div class="big">❓ 未找到</div><div class="detail">类别 ${p.category} / 国家 ${p.country} 在此期 Bulletin 中无记录</div></div>`;
+    return;
+  }
+
+  const cutoff = row.cutoff_date;
+  let cls = "s-yellow", icon = "⏳", label = "等待中";
+  let detail = `当前截止日期：<b>${cutoff || "不开放"}</b>`;
+
+  if (cutoff === "Current") {
+    cls = "s-green"; icon = "✅"; label = "排期已到，可递交！";
+    detail += "　你的 Priority Date 已覆盖。";
+  } else if (!cutoff) {
+    cls = "s-red"; icon = "🚫"; label = "暂不开放（Unavailable）";
+  } else {
+    const gap = dateDiffMonths(p.priority_date, cutoff);
+    if (gap === null) { detail += "（日期解析错误）"; }
+    else if (gap <= 0) {
+      cls = "s-green"; icon = "✅"; label = "排期已到，可递交！";
+      detail += "　你的 Priority Date 已覆盖。";
+    } else {
+      detail += `　排期还需前进约 <b>${gap}</b> 个月。`;
+    }
+  }
+
+  const yr = bulletin.year, mo = String(bulletin.month).padStart(2,"0");
+  el.innerHTML = `
+    <div class="status-box ${cls}">
+      <div class="label">${p.category} · ${p.country} · Chart ${p.chart || "A"} · ${yr}-${mo} Bulletin</div>
+      <div class="big">${icon} ${label}</div>
+      <div class="detail">${detail}</div>
+    </div>`;
+}
+
+// ---- 历史走势 ----
+
+async function renderTrend(p) {
+  const msg = document.getElementById("chart-msg");
+  if (!p.priority_date || !DATA.index) { msg.style.display = "block"; return; }
+
+  const chart_key = "chart_" + (p.chart || "A").toLowerCase();
+  const history = [];
+
+  for (const item of [...DATA.index.bulletins].reverse()) {
+    const b = await getBulletin(item.year, item.month);
+    if (!b) continue;
+    const row = (b[chart_key] || []).find(e => e.category === p.category && e.country === p.country);
+    history.push({
+      label: `${item.year}-${String(item.month).padStart(2,"0")}`,
+      value: row?.cutoff_date && row.cutoff_date !== "Current" ? new Date(row.cutoff_date).getTime() : null,
+      is_current: row?.cutoff_date === "Current",
+    });
+  }
+
+  msg.style.display = history.length ? "none" : "block";
+  if (!history.length) return;
+
+  const ctx = document.getElementById("trend-chart").getContext("2d");
+  if (trendChart) trendChart.destroy();
+
+  // Priority Date 参考线
+  const pdMs = new Date(p.priority_date).getTime();
+
+  trendChart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: history.map(h => h.label),
+      datasets: [
+        {
+          label: "排期截止日",
+          data: history.map(h => h.value),
+          borderColor: "#2e7d32",
+          backgroundColor: "rgba(46,125,50,0.07)",
+          tension: 0.3,
+          pointRadius: 4,
+          fill: true,
+        },
+        {
+          label: "我的 Priority Date",
+          data: history.map(() => pdMs),
+          borderColor: "#f57f17",
+          borderDash: [5, 4],
+          borderWidth: 1.5,
+          pointRadius: 0,
+          fill: false,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          ticks: {
+            callback: v => v ? new Date(v).toISOString().slice(0,7) : ""
+          }
+        }
+      },
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: c => c.raw ? new Date(c.raw).toISOString().slice(0,10) : "不开放 / Current"
+          }
+        }
+      }
+    }
+  });
+}
+
+// ---- 总览表格 ----
+
+function switchLatest(type) {
+  latestChartType = type;
+  document.getElementById("tab-la").classList.toggle("on", type === "A");
+  document.getElementById("tab-lb").classList.toggle("on", type === "B");
+  renderLatestTable();
+}
+
+async function renderLatestTable() {
+  const tbody = document.getElementById("latest-body");
+  const b = await getLatestBulletin();
+  if (!b) {
+    tbody.innerHTML = `<tr><td colspan="6" class="msg">暂无数据</td></tr>`;
+    return;
+  }
+
+  const chart_key = "chart_" + latestChartType.toLowerCase();
+  const entries = b[chart_key] || [];
+  const byCategory = {};
+  for (const e of entries) {
+    if (!byCategory[e.category]) byCategory[e.category] = {};
+    byCategory[e.category][e.country] = e.cutoff_date;
+  }
+
+  const rows = Object.entries(byCategory).map(([cat, map]) => {
+    const cells = COUNTRIES.map(c => {
+      const v = map[c];
+      if (v === "Current") return `<td><span class="tag-c">Current</span></td>`;
+      if (!v) return `<td><span class="tag-u">—</span></td>`;
+      return `<td>${v}</td>`;
+    }).join("");
+    return `<tr><td><b>${cat}</b></td>${cells}</tr>`;
+  }).join("");
+
+  tbody.innerHTML = rows || `<tr><td colspan="6" class="msg">无数据</td></tr>`;
+}
+
+// ---- 初始化 ----
+(async () => {
+  loadProfile();
+  try {
+    await loadIndex();
+    await renderLatestTable();
+    const p = JSON.parse(localStorage.getItem("gc_profile") || "{}");
+    if (p.priority_date) {
+      await renderMyStatus(p);
+      await renderTrend(p);
+    }
+  } catch (e) {
+    document.getElementById("data-version").textContent = "⚠️ 暂无数据";
+    console.warn(e);
+  }
+})();
+</script>
+
+</body>
+</html>
