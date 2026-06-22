@@ -88,6 +88,10 @@
     .tbl tr:last-child td { border: none; }
     .tag-c { background: #c8e6c9; color: #1b5e20; padding: 1px 7px; border-radius: 9px; font-size: 0.75rem; font-weight: 700; }
     .tag-u { background: #fce4ec; color: #880e4f; padding: 1px 7px; border-radius: 9px; font-size: 0.75rem; }
+    .mov { display: block; font-size: 0.7rem; margin-top: 2px; font-weight: 600; }
+    .mov-up   { color: #2e7d32; }
+    .mov-down { color: #c62828; }
+    .mov-same { color: #90a4ae; font-weight: 400; }
 
     .msg { text-align: center; color: #aaa; padding: 28px 0; font-size: 0.88rem; }
     #update-time { font-size: 0.75rem; color: #aaa; margin-top: 8px; }
@@ -262,6 +266,12 @@ const I18N = {
     opt_chart_b: "Chart B – Dates for Filing",
     chart_label_cutoff: "Cutoff Date",
     chart_label_my_pd: "My Priority Date",
+    mov_vs_last: "vs. last month:",
+    mov_advance: "↑ {n} days",
+    mov_retract: "↓ {n} days",
+    mov_same: "= no change",
+    mov_became_current: "↑ became Current",
+    mov_lost_current: "↓ lost Current",
   },
   zh: {
     title: "绿卡排期追踪",
@@ -308,6 +318,12 @@ const I18N = {
     opt_chart_b: "Chart B – 可递交日期",
     chart_label_cutoff: "排期截止日",
     chart_label_my_pd: "我的 Priority Date",
+    mov_vs_last: "较上月：",
+    mov_advance: "↑ 前进 {n} 天",
+    mov_retract: "↓ 后退 {n} 天",
+    mov_same: "= 不变",
+    mov_became_current: "↑ 变为 Current",
+    mov_lost_current: "↓ 退出 Current",
   },
   es: {
     title: "Seguimiento de Fecha Prioritaria (Green Card)",
@@ -354,6 +370,12 @@ const I18N = {
     opt_chart_b: "Tabla B – Fechas para Presentar",
     chart_label_cutoff: "Fecha de Corte",
     chart_label_my_pd: "Mi Fecha Prioritaria",
+    mov_vs_last: "vs. mes anterior:",
+    mov_advance: "↑ {n} días",
+    mov_retract: "↓ {n} días",
+    mov_same: "= sin cambio",
+    mov_became_current: "↑ llegó a Current",
+    mov_lost_current: "↓ perdió Current",
   },
 };
 
@@ -428,6 +450,33 @@ async function getLatestBulletin() {
   return getBulletin(year, month);
 }
 
+async function getPrevBulletin() {
+  if (!DATA.index?.bulletins || DATA.index.bulletins.length < 2) return null;
+  const { year, month } = DATA.index.bulletins[1];
+  return getBulletin(year, month);
+}
+
+function calcMovement(prevDate, currDate) {
+  if (prevDate === undefined || prevDate === null) return null;
+  if (prevDate === currDate) return { type: "same", days: 0 };
+  if (currDate === "Current" && prevDate !== "Current") return { type: "became_current", days: null };
+  if (prevDate === "Current" && currDate !== "Current") return { type: "lost_current", days: null };
+  if (!currDate && !prevDate) return { type: "same", days: 0 };
+  if (!currDate || !prevDate) return null;
+  const days = Math.round((new Date(currDate) - new Date(prevDate)) / (1000 * 86400));
+  return { type: days > 0 ? "advance" : days < 0 ? "retract" : "same", days };
+}
+
+function formatMovement(mov) {
+  if (!mov) return "";
+  if (mov.type === "same")           return `<span class="mov mov-same">${t("mov_same")}</span>`;
+  if (mov.type === "became_current") return `<span class="mov mov-up">${t("mov_became_current")}</span>`;
+  if (mov.type === "lost_current")   return `<span class="mov mov-down">${t("mov_lost_current")}</span>`;
+  if (mov.type === "advance")        return `<span class="mov mov-up">${t("mov_advance", { n: mov.days })}</span>`;
+  if (mov.type === "retract")        return `<span class="mov mov-down">${t("mov_retract", { n: Math.abs(mov.days) })}</span>`;
+  return "";
+}
+
 function renderVersionBadge() {
   if (!DATA.index?.bulletins?.length) return;
   const { year, month } = DATA.index.bulletins[0];
@@ -482,7 +531,7 @@ async function renderMyStatus(p) {
   const el = document.getElementById("my-status");
   if (!p.priority_date) { el.innerHTML = ""; return; }
 
-  const b = await getLatestBulletin();
+  const [b, prev] = await Promise.all([getLatestBulletin(), getPrevBulletin()]);
   if (!b) {
     el.innerHTML = `<div class="status-box s-red"><div class="big">⚠️ ${t("status_no_data")}</div></div>`;
     return;
@@ -506,9 +555,6 @@ async function renderMyStatus(p) {
     cls = "s-red"; icon = "🚫"; label = t("status_unavailable");
   } else {
     const gap = dateDiffMonths(p.priority_date, cutoff);
-    // gap = cutoff - priority_date (months)
-    // positive → cutoff is AFTER priority_date → can file
-    // negative → cutoff is BEFORE priority_date → cannot file yet
     if (gap !== null && gap >= 0) {
       cls = "s-green"; icon = "✅"; label = t("status_current");
       detail = t("status_covered");
@@ -517,12 +563,17 @@ async function renderMyStatus(p) {
     }
   }
 
+  // movement vs previous month
+  const prevRow = prev ? (prev[chart_key] || []).find(e => e.category === p.category && e.country === p.country) : null;
+  const mov = calcMovement(prevRow?.cutoff_date, cutoff);
+  const movHtml = mov ? `<br><span style="font-size:0.82rem;color:#546e7a">${t("mov_vs_last")} </span>${formatMovement(mov)}` : "";
+
   const yr = b.year, mo = String(b.month).padStart(2, "0");
   el.innerHTML = `
     <div class="status-box ${cls}">
       <div class="lbl">${p.category} · ${p.country} · Chart ${p.chart || "A"} · ${yr}-${mo}</div>
       <div class="big">${icon} ${label}</div>
-      <div class="detail">${t("status_cutoff")} <b>${cutoff || "—"}</b>${detail ? "　" + detail : ""}</div>
+      <div class="detail">${t("status_cutoff")} <b>${cutoff || "—"}</b>${detail ? "　" + detail : ""}${movHtml}</div>
     </div>`;
 }
 
@@ -609,26 +660,37 @@ function switchLatest(type) {
 
 async function renderLatestTable() {
   const tbody = document.getElementById("latest-body");
-  const b = await getLatestBulletin();
+  const [b, prev] = await Promise.all([getLatestBulletin(), getPrevBulletin()]);
   if (!b) {
     tbody.innerHTML = `<tr><td colspan="6" class="msg">${t("status_no_data")}</td></tr>`;
     return;
   }
 
   const chart_key = "chart_" + latestChartType.toLowerCase();
-  const entries = b[chart_key] || [];
-  const byCategory = {};
-  for (const e of entries) {
-    if (!byCategory[e.category]) byCategory[e.category] = {};
-    byCategory[e.category][e.country] = e.cutoff_date;
+
+  // index current and previous by category+country
+  const curr = {}, prevMap = {};
+  for (const e of b[chart_key] || []) {
+    if (!curr[e.category]) curr[e.category] = {};
+    curr[e.category][e.country] = e.cutoff_date;
+  }
+  if (prev) {
+    for (const e of prev[chart_key] || []) {
+      if (!prevMap[e.category]) prevMap[e.category] = {};
+      prevMap[e.category][e.country] = e.cutoff_date;
+    }
   }
 
-  const rows = Object.entries(byCategory).map(([cat, map]) => {
+  const rows = Object.entries(curr).map(([cat, map]) => {
     const cells = COUNTRIES.map(c => {
       const v = map[c];
-      if (v === "Current") return `<td><span class="tag-c">Current</span></td>`;
-      if (!v) return `<td><span class="tag-u">—</span></td>`;
-      return `<td>${v}</td>`;
+      const pv = prevMap[cat]?.[c];
+      const mov = calcMovement(pv, v);
+      const movHtml = formatMovement(mov);
+
+      if (v === "Current") return `<td><span class="tag-c">Current</span>${movHtml}</td>`;
+      if (!v)              return `<td><span class="tag-u">—</span></td>`;
+      return `<td>${v}${movHtml}</td>`;
     }).join("");
     return `<tr><td><b>${cat}</b></td>${cells}</tr>`;
   }).join("");
