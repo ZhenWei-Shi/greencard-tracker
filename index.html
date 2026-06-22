@@ -506,11 +506,14 @@ async function renderMyStatus(p) {
     cls = "s-red"; icon = "🚫"; label = t("status_unavailable");
   } else {
     const gap = dateDiffMonths(p.priority_date, cutoff);
-    if (gap !== null && gap <= 0) {
+    // gap = cutoff - priority_date (months)
+    // positive → cutoff is AFTER priority_date → can file
+    // negative → cutoff is BEFORE priority_date → cannot file yet
+    if (gap !== null && gap >= 0) {
       cls = "s-green"; icon = "✅"; label = t("status_current");
       detail = t("status_covered");
     } else if (gap !== null) {
-      detail = t("status_gap", { n: gap });
+      detail = t("status_gap", { n: Math.abs(gap) });
     }
   }
 
