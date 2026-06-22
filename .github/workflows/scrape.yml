@@ -1,14 +1,12 @@
-name: 每月抓取 Visa Bulletin
+name: Scrape Visa Bulletin
 
 on:
-  # 每月 25 日 UTC 18:00（State Dept 通常月底前发布）
   schedule:
     - cron: "0 18 25 * *"
-  # 允许手动触发
   workflow_dispatch:
     inputs:
       history:
-        description: "抓取最近 N 期（默认 1）"
+        description: "Number of bulletins to fetch (default 1)"
         default: "1"
         required: false
 
@@ -22,23 +20,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: 设置 Python
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: 安装依赖
+      - name: Install dependencies
         run: pip install -r scraper/requirements.txt
 
-      - name: 运行 Scraper
+      - name: Run scraper
         run: |
           N="${{ github.event.inputs.history || '1' }}"
           python scraper/scraper.py --history "$N"
 
-      - name: 提交数据更新
+      - name: Commit data update
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add data/
-          git diff --cached --quiet || git commit -m "data: 更新 Visa Bulletin $(date +'%Y-%m')"
+          git diff --cached --quiet || git commit -m "data: update visa bulletin $(date +'%Y-%m')"
           git push
