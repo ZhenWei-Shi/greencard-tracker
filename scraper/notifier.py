@@ -89,12 +89,10 @@ def format_gap(priority_date, cur_cutoff) -> str:
     return f"还需等待约 {abs(gap)} 个月"
 
 
-def build_message(year, month) -> tuple[str, str]:
-    category = os.environ["NOTIFY_CATEGORY"]
-    country = os.environ["NOTIFY_COUNTRY"]
-    chart = os.environ.get("NOTIFY_CHART", "A")
-    priority_date = os.environ["NOTIFY_PRIORITY_DATE"]
+CHART_LABELS = {"A": "Final Action Dates（终裁日期）", "B": "Dates for Filing（递交日期）"}
 
+
+def build_chart_section(year, month, chart, category, country, priority_date) -> str:
     cur_bulletin = load_bulletin(year, month)
     cur_entries = cur_bulletin[f"chart_{chart.lower()}"] if cur_bulletin else []
     cur_cutoff = find_cutoff(cur_entries, category, country)
@@ -106,14 +104,25 @@ def build_message(year, month) -> tuple[str, str]:
 
     movement = calc_movement_days(prev_cutoff, cur_cutoff)
 
-    subject = f"Visa Bulletin {year}-{month:02d} 已更新"
-    body = (
-        f"{subject}\n\n"
-        f"类别：{category}  国家：{country}  Chart：{chart}\n"
+    return (
+        f"【Chart {chart} - {CHART_LABELS[chart]}】\n"
         f"本期截止日：{cur_cutoff}\n"
         f"月环比：{format_movement(movement)}\n"
         f"你的优先日 {priority_date} 状态：{format_gap(priority_date, cur_cutoff)}\n"
     )
+
+
+def build_message(year, month) -> tuple[str, str]:
+    category = os.environ["NOTIFY_CATEGORY"]
+    country = os.environ["NOTIFY_COUNTRY"]
+    priority_date = os.environ["NOTIFY_PRIORITY_DATE"]
+
+    subject = f"Visa Bulletin {year}-{month:02d} 已更新"
+    sections = [
+        build_chart_section(year, month, chart, category, country, priority_date)
+        for chart in ("A", "B")
+    ]
+    body = f"{subject}\n\n类别：{category}  国家：{country}\n\n" + "\n".join(sections)
     return subject, body
 
 
