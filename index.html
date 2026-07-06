@@ -424,23 +424,36 @@ function setLang(l) {
 // ============================================================
 // Data
 // ============================================================
+const API_BASE = "https://129-213-200-166.sslip.io";
 const DATA = { index: null, bulletins: {} };
 const COUNTRIES = ["China", "India", "Mexico", "Philippines", "ROW"];
 let trendChart = null;
 let latestChartType = "A";
 
 async function loadIndex() {
-  const res = await fetch("data/index.json?_=" + Date.now());
-  if (!res.ok) throw new Error("index.json not found");
-  DATA.index = await res.json();
+  try {
+    const res = await fetch(API_BASE + "/api/index?_=" + Date.now());
+    if (!res.ok) throw new Error("server index unavailable");
+    DATA.index = await res.json();
+  } catch {
+    const res = await fetch("data/index.json?_=" + Date.now()); // 服务器不可用时回退到静态快照
+    if (!res.ok) throw new Error("index.json not found");
+    DATA.index = await res.json();
+  }
 }
 
 async function getBulletin(year, month) {
   const key = `${year}_${String(month).padStart(2, "0")}`;
   if (DATA.bulletins[key]) return DATA.bulletins[key];
-  const res = await fetch(`data/bulletin_${key}.json`);
-  if (!res.ok) return null;
-  DATA.bulletins[key] = await res.json();
+  try {
+    const res = await fetch(`${API_BASE}/api/bulletin/${year}/${month}`);
+    if (!res.ok) throw new Error("server bulletin unavailable");
+    DATA.bulletins[key] = await res.json();
+  } catch {
+    const res = await fetch(`data/bulletin_${key}.json`); // 服务器不可用时回退到静态快照
+    if (!res.ok) return null;
+    DATA.bulletins[key] = await res.json();
+  }
   return DATA.bulletins[key];
 }
 

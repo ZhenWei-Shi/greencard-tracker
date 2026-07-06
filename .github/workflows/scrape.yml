@@ -2,7 +2,7 @@ name: Scrape Visa Bulletin
 
 on:
   schedule:
-    - cron: "0 18 17,22,27,30 * *"
+    - cron: "0 18 28 * *" # 灾备快照：服务器改为每小时抓取后，这里只保留月末一次兜底
   workflow_dispatch:
     inputs:
       history:
