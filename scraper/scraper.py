@@ -213,6 +213,17 @@ def rebuild_index():
     print(f"index.json 已更新，共 {len(index)} 期")
 
 
+def get_latest_from_index():
+    """读取当前 index.json 里记录的最新一期 (year, month)，没有则返回 None。"""
+    path = os.path.join(DATA_DIR, "index.json")
+    if not os.path.exists(path):
+        return None
+    with open(path, encoding="utf-8") as f:
+        idx = json.load(f)
+    bulletins = idx.get("bulletins", [])
+    return (bulletins[0]["year"], bulletins[0]["month"]) if bulletins else None
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--history", type=int, default=1,
@@ -220,6 +231,8 @@ def main():
     args = parser.parse_args()
 
     os.makedirs(DATA_DIR, exist_ok=True)
+    old_latest = get_latest_from_index()
+
     urls = get_bulletin_urls()
     n = min(args.history, len(urls))
     print(f"找到 {len(urls)} 期 Bulletin，抓取最近 {n} 期...")
@@ -234,6 +247,15 @@ def main():
             print(f"  跳过（错误：{e}）")
 
     rebuild_index()
+
+    new_latest = get_latest_from_index()
+    if new_latest and new_latest != old_latest:
+        try:
+            import notifier
+            notifier.notify_new_bulletin(*new_latest)
+        except Exception as e:
+            print(f"通知模块调用失败（不影响抓取结果）：{e}")
+
     print("完成")
 
 
