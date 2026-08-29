@@ -198,6 +198,14 @@ class TestForecast:
         assert r_summer["prob_retrogress"] >= 0.25
         assert r_winter["prob_retrogress"] == 0.10
 
+    def test_paces_exposed_for_chart_projection(self):
+        b = self._steady(months=24, step_days=25)
+        latest = extract_series(b, "EB4", "China", "A")[-1][1]
+        pd = date.fromordinal(date.fromisoformat(latest).toordinal() + 500).isoformat()
+        r = forecast(pd, "EB4", "China", b, "A")
+        assert set(r["paces"]) == {"near", "recent", "mid", "long_"}
+        assert all(isinstance(v, (int, float)) for v in r["paces"].values())
+
     def test_scenarios_ordered(self):
         b = self._steady(months=24, step_days=25)
         latest = extract_series(b, "EB4", "China", "A")[-1][1]
