@@ -93,6 +93,20 @@
     .mov-down { color: #c62828; }
     .mov-same { color: #90a4ae; font-weight: 400; }
 
+    /* forecast card */
+    .fc-row { padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+    .fc-row:last-of-type { border-bottom: none; }
+    .fc-label { font-size: 0.78rem; color: var(--gray); font-weight: 600; margin-bottom: 3px; }
+    .fc-big { font-size: 1.2rem; font-weight: 700; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .fc-big.fc-ok { color: var(--green); }
+    .fc-big.fc-bad { color: var(--red); }
+    .fc-sub { font-size: 0.82rem; color: #666; margin-top: 2px; }
+    .fc-pill { font-size: 0.68rem; font-weight: 700; padding: 2px 8px; border-radius: 10px; text-transform: uppercase; letter-spacing: .04em; }
+    .fc-pill-high   { background: var(--green-light); color: var(--green); }
+    .fc-pill-medium { background: var(--yellow-light); color: var(--yellow); }
+    .fc-pill-low    { background: #eceff1; color: var(--gray); }
+    .fc-note { font-size: 0.72rem; color: #aaa; margin-top: 10px; line-height: 1.5; }
+
     .msg { text-align: center; color: #aaa; padding: 28px 0; font-size: 0.88rem; }
     #update-time { font-size: 0.75rem; color: #aaa; margin-top: 8px; }
 
@@ -170,6 +184,9 @@
 
   <!-- Status -->
   <div id="my-status"></div>
+
+  <!-- Forecast -->
+  <div id="my-forecast"></div>
 
   <!-- Trend chart -->
   <div class="card">
@@ -272,6 +289,21 @@ const I18N = {
     mov_same: "= no change",
     mov_became_current: "↑ became Current",
     mov_lost_current: "↓ lost Current",
+    fc_title: "Forecast",
+    fc_to_file: "Estimated — eligible to file (Chart B)",
+    fc_to_approve: "Estimated — eligible for approval (Chart A)",
+    fc_months: "~{n} months",
+    fc_range: "optimistic {opt} / conservative {cons} mo",
+    fc_prob_next: "current next month ~{n}%",
+    fc_prob_retro: "retrogression risk ~{n}%",
+    fc_conf_low: "low confidence",
+    fc_conf_medium: "medium confidence",
+    fc_conf_high: "high confidence",
+    fc_current: "Current — no backlog",
+    fc_eligible_now: "You can proceed now",
+    fc_unavailable: "Category Unavailable",
+    fc_never: "Not reachable at the current pace",
+    fc_disclaimer: "Statistical estimate from historical movement only. Policy changes, the Oct 1 fiscal-year reset, or demand surges will change this.",
   },
   zh: {
     title: "绿卡排期追踪",
@@ -324,6 +356,21 @@ const I18N = {
     mov_same: "= 不变",
     mov_became_current: "↑ 变为 Current",
     mov_lost_current: "↓ 退出 Current",
+    fc_title: "预测",
+    fc_to_file: "预计可递交（Chart B）",
+    fc_to_approve: "预计可获批（Chart A）",
+    fc_months: "约 {n} 个月",
+    fc_range: "乐观 {opt} / 保守 {cons} 个月",
+    fc_prob_next: "下期就轮到 ~{n}%",
+    fc_prob_retro: "退表风险 ~{n}%",
+    fc_conf_low: "置信度低",
+    fc_conf_medium: "置信度中",
+    fc_conf_high: "置信度高",
+    fc_current: "Current，无排期限制",
+    fc_eligible_now: "现在即可办理",
+    fc_unavailable: "该类别暂不开放（Unavailable）",
+    fc_never: "按当前推进速度短期内排不到",
+    fc_disclaimer: "仅按历史推进速度做统计估算。政策变动、每年 10 月财年重置、需求激增都会改变结果。",
   },
   es: {
     title: "Seguimiento de Fecha Prioritaria (Green Card)",
@@ -376,6 +423,21 @@ const I18N = {
     mov_same: "= sin cambio",
     mov_became_current: "↑ llegó a Current",
     mov_lost_current: "↓ perdió Current",
+    fc_title: "Pronóstico",
+    fc_to_file: "Estimado — para presentar (Tabla B)",
+    fc_to_approve: "Estimado — para aprobación (Tabla A)",
+    fc_months: "~{n} meses",
+    fc_range: "optimista {opt} / conservador {cons} m",
+    fc_prob_next: "actual el próximo mes ~{n}%",
+    fc_prob_retro: "riesgo de retroceso ~{n}%",
+    fc_conf_low: "confianza baja",
+    fc_conf_medium: "confianza media",
+    fc_conf_high: "confianza alta",
+    fc_current: "Current — sin retraso",
+    fc_eligible_now: "Puedes proceder ahora",
+    fc_unavailable: "Categoría no disponible",
+    fc_never: "Inalcanzable al ritmo actual",
+    fc_disclaimer: "Estimación estadística basada solo en el movimiento histórico. Cambios de política, el reinicio del año fiscal del 1 de octubre o picos de demanda lo alterarán.",
   },
 };
 
@@ -411,6 +473,7 @@ function applyLang() {
   const p = getProfile();
   if (p.priority_date) {
     renderMyStatus(p);
+    renderForecast(p);
     renderTrend(p);
   }
 }
@@ -490,6 +553,213 @@ function formatMovement(mov) {
   return "";
 }
 
+// ============================================================
+// Forecast —— 与 scraper/forecast.py 等价的移植版，改一处记得同步另一处
+// ============================================================
+const FC_FALLBACK = {
+  "EB4-China": 120, "EB4-India": 120, "EB4-ROW": 150,
+  "EB4-R-China": 120, "EB4-R-ROW": 150,
+  "EB2-China": 60, "EB3-China": 80, "EB2-India": 25, "EB3-India": 30,
+  "_default": 200,
+};
+const DAY = 86400000;
+
+function fcFallbackLong(cat, country) {
+  return (FC_FALLBACK[`${cat}-${country}`] ?? FC_FALLBACK._default) / 12;
+}
+function isoMonth(d) {
+  return d.getUTCFullYear() + "-" + String(d.getUTCMonth() + 1).padStart(2, "0");
+}
+function fcExtractSeries(bulletins, category, country, chart) {
+  const key = String(chart).toUpperCase() === "A" ? "chart_a" : "chart_b";
+  const rows = [];
+  for (const b of bulletins) {
+    if (b.year == null || b.month == null) continue;
+    let cutoff = null;
+    for (const e of (b[key] || [])) {
+      if (e.category === category && e.country === country) { cutoff = e.cutoff_date; break; }
+    }
+    rows.push([new Date(Date.UTC(b.year, b.month - 1, 1)), cutoff]);
+  }
+  rows.sort((a, b) => a[0] - b[0]);
+  return rows;
+}
+function fcNumericPoints(series) {
+  const out = [];
+  for (const [md, c] of series) {
+    if (typeof c === "string" && c !== "Current") {
+      const d = new Date(c + "T00:00:00Z");
+      if (!isNaN(d)) out.push([md, d]);
+    }
+  }
+  return out;
+}
+function fcMonthsBetween(a, b) {
+  return (b.getUTCFullYear() - a.getUTCFullYear()) * 12 + (b.getUTCMonth() - a.getUTCMonth());
+}
+function fcObservedPace(series, window) {
+  let pts = fcNumericPoints(series);
+  if (pts.length < 2) return null;
+  if (window != null) { pts = pts.slice(-(window + 1)); if (pts.length < 2) return null; }
+  const [m0, c0] = pts[0], [m1, c1] = pts[pts.length - 1];
+  const span = fcMonthsBetween(m0, m1);
+  if (span <= 0) return null;
+  return (c1 - c0) / DAY / span;
+}
+function fcLatestMove(series) {
+  const pts = fcNumericPoints(series);
+  if (pts.length < 2) return null;
+  return Math.round((pts[pts.length - 1][1] - pts[pts.length - 2][1]) / DAY);
+}
+function fcPaceAt(y, near, recent, mid, long_) {
+  const base = 0.55 * near + 0.20 * recent + 0.25 * long_;
+  if (y <= 12) return base;
+  if (y <= 36) { const f = (y - 12) / 24; return (1 - f) * base + f * mid; }
+  if (y <= 120) { const f = (y - 36) / 84; const anchor = 0.6 * long_ + 0.4 * mid; return (1 - f) * mid + f * anchor; }
+  return 0.6 * long_ + 0.4 * mid;
+}
+function fcCumulative(months, near, recent, mid, long_) {
+  if (months <= 0) return 0;
+  let total = 0; const full = Math.floor(months);
+  for (let y = 1; y <= full; y++) total += fcPaceAt(y, near, recent, mid, long_);
+  const frac = months - full;
+  if (frac > 0) total += fcPaceAt(full + 1, near, recent, mid, long_) * frac;
+  return total;
+}
+function fcMonthsToCurrent(distanceDays, near, recent, mid, long_, cap = 720) {
+  if (distanceDays <= 0) return 0;
+  if (fcCumulative(cap, near, recent, mid, long_) < distanceDays) return null;
+  let lo = 0, hi = cap;
+  for (let i = 0; i < 40; i++) {
+    const m = (lo + hi) / 2;
+    if (fcCumulative(m, near, recent, mid, long_) < distanceDays) lo = m; else hi = m;
+    if (hi - lo < 0.05) break;
+  }
+  return Math.round((lo + hi) / 2 * 10) / 10;
+}
+function fcMonthsUntilFYEnd(today) {
+  let sep30 = new Date(Date.UTC(today.getUTCFullYear(), 8, 30));
+  if (today > sep30) sep30 = new Date(Date.UTC(today.getUTCFullYear() + 1, 8, 30));
+  return (sep30 - today) / DAY / 30.44;
+}
+function forecast(priorityDate, category, country, bulletins, chart, today) {
+  today = today || new Date();
+  const series = fcExtractSeries(bulletins, category, country, chart);
+  const res = {
+    chart: String(chart).toUpperCase(), current_cutoff: null,
+    eligible: false, is_current: false, unavailable: false,
+    distance_days: null, this_month_days: fcLatestMove(series),
+    avg_pace_days_per_month: null,
+    months_expected: null, months_optimistic: null, months_conservative: null,
+    prob_current_next: null, prob_advance: null, prob_retrogress: null, confidence: "low",
+  };
+  let current = null;
+  for (let i = series.length - 1; i >= 0; i--) { if (series[i][1] != null) { current = series[i][1]; break; } }
+  res.current_cutoff = current;
+  if (current === "Current") {
+    Object.assign(res, { eligible: true, is_current: true, confidence: "high", months_expected: 0, months_optimistic: 0, months_conservative: 0 });
+    return res;
+  }
+  if (current == null) { res.unavailable = true; return res; }
+  const pd = new Date(priorityDate + "T00:00:00Z"), cut = new Date(current + "T00:00:00Z");
+  if (isNaN(pd) || isNaN(cut)) return res;
+  const distance = Math.round((pd - cut) / DAY);
+  res.distance_days = distance;
+  const move = res.this_month_days;
+  if (distance <= 0) {
+    Object.assign(res, { eligible: true, confidence: "high", months_expected: 0, months_optimistic: 0, months_conservative: 0 });
+    return res;
+  }
+  // 用「== null」判断而非真假：实测速度可能正好是 0（近几期持平），是有效信号
+  let near = fcObservedPace(series, 3);
+  if (near == null) near = fcObservedPace(series, 6);
+  let recent = fcObservedPace(series, 12);
+  let mid = fcObservedPace(series, 24);
+  let long_ = fcObservedPace(series, null);
+  if (long_ == null) long_ = fcFallbackLong(category, country);
+  if (recent == null) recent = long_;
+  if (mid == null) mid = recent;
+  // 近期停滞/后退时，退回 12 月均速 → 全程均速 → 兜底表，取一个正的外推基准，并压低置信度
+  const nearStalled = (near == null || near <= 0);
+  if (nearStalled) {
+    near = recent > 0 ? recent : (long_ > 0 ? long_ : fcFallbackLong(category, country));
+  }
+  res.avg_pace_days_per_month = Math.round(near * 10) / 10;
+  const scen = (mult) => fcMonthsToCurrent(distance, Math.max(near * mult, 0), Math.max(recent, 0), Math.max(mid, 0), Math.max(long_, 0));
+  res.months_expected = scen(1.0);
+  res.months_optimistic = scen(1.5);
+  res.months_conservative = scen(0.35);
+  const exp1 = fcPaceAt(1, Math.max(near, 0), Math.max(recent, 0), Math.max(mid, 0), Math.max(long_, 0));
+  res.prob_current_next = exp1 <= 0 ? 0.02 : exp1 >= distance ? 0.75 : distance < 1.5 * exp1 ? 0.40 : distance < 3 * exp1 ? 0.10 : 0.02;
+  res.prob_advance = move == null ? 0.60 : move > 0 ? 0.72 : move < 0 ? 0.35 : 0.45;
+  let pr = 0.10;
+  if (fcMonthsUntilFYEnd(today) < 3) pr = Math.max(pr, 0.25);
+  if (move != null && move < 0) pr = Math.max(pr, 0.40);
+  res.prob_retrogress = pr;
+  let conf = "medium";
+  if (long_ * 12 < 30) conf = "low";
+  if (res.months_expected == null || res.months_expected > 120) conf = "low";
+  if (nearStalled) conf = "low";
+  if (near >= 60 && move != null && move > 0 && !nearStalled) conf = "high";
+  res.confidence = conf;
+  return res;
+}
+
+async function loadAllBulletins() {
+  if (!DATA.index?.bulletins) return [];
+  const out = [];
+  for (const item of DATA.index.bulletins) {
+    const b = await getBulletin(item.year, item.month);
+    if (b) out.push(b);
+  }
+  return out;
+}
+
+function renderFcRow(label, fc) {
+  if (fc.is_current)
+    return `<div class="fc-label">${label}</div><div class="fc-big fc-ok">${t("fc_current")}</div>`;
+  if (fc.eligible)
+    return `<div class="fc-label">${label}</div><div class="fc-big fc-ok">${t("fc_eligible_now")}</div>`;
+  if (fc.unavailable)
+    return `<div class="fc-label">${label}</div><div class="fc-big fc-bad">${t("fc_unavailable")}</div>`;
+  const me = fc.months_expected;
+  if (me == null)
+    return `<div class="fc-label">${label}</div><div class="fc-big">${t("fc_never")}` +
+           ` <span class="fc-pill fc-pill-low">${t("fc_conf_low")}</span></div>`;
+  const rng = (fc.months_optimistic != null && fc.months_conservative != null)
+    ? t("fc_range", { opt: Math.round(fc.months_optimistic), cons: Math.round(fc.months_conservative) })
+    : "";
+  const probs = `${t("fc_prob_next", { n: Math.round(fc.prob_current_next * 100) })}` +
+                ` · ${t("fc_prob_retro", { n: Math.round(fc.prob_retrogress * 100) })}`;
+  return `
+    <div class="fc-label">${label}</div>
+    <div class="fc-big">${t("fc_months", { n: Math.round(me) })}
+      <span class="fc-pill fc-pill-${fc.confidence}">${t("fc_conf_" + fc.confidence)}</span></div>
+    ${rng ? `<div class="fc-sub">${rng}</div>` : ""}
+    <div class="fc-sub">${probs}</div>`;
+}
+
+async function renderForecast(p) {
+  const el = document.getElementById("my-forecast");
+  if (!p.priority_date) { el.innerHTML = ""; return; }
+  const bulletins = await loadAllBulletins();
+  if (!bulletins.length) { el.innerHTML = ""; return; }
+
+  const rows = [
+    { chart: "B", label: t("fc_to_file") },
+    { chart: "A", label: t("fc_to_approve") },
+  ].map(({ chart, label }) => {
+    const fc = forecast(p.priority_date, p.category, p.country, bulletins, chart);
+    return `<div class="fc-row">${renderFcRow(label, fc)}</div>`;
+  }).join("");
+
+  el.innerHTML = `<div class="card">
+    <div class="card-title">${t("fc_title")}</div>
+    ${rows}
+    <p class="fc-note">${t("fc_disclaimer")}</p>
+  </div>`;
+}
+
 function renderVersionBadge() {
   if (!DATA.index?.bulletins?.length) return;
   const { year, month } = DATA.index.bulletins[0];
@@ -528,6 +798,7 @@ function saveProfile() {
 async function saveAndCheck() {
   const p = saveProfile();
   await renderMyStatus(p);
+  await renderForecast(p);
   await renderTrend(p);
 }
 
@@ -724,6 +995,7 @@ async function renderLatestTable() {
     const p = getProfile();
     if (p.priority_date) {
       await renderMyStatus(p);
+      await renderForecast(p);
       await renderTrend(p);
     }
   } catch (e) {

@@ -10,6 +10,8 @@ import smtplib
 from datetime import date
 from email.mime.text import MIMEText
 
+from forecast import forecast as run_forecast
+
 DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "data")
 
 
@@ -62,6 +64,43 @@ def previous_month(year, month):
     return (year - 1, 12) if month == 1 else (year, month - 1)
 
 
+def load_recent_bulletins(year, month, n=18):
+    """从 (year, month) 往回连续读最多 n 期，供 forecast 用。缺的月份跳过。"""
+    out = []
+    y, m = year, month
+    for _ in range(n):
+        b = load_bulletin(y, m)
+        if b:
+            out.append(b)
+        y, m = previous_month(y, m)
+    return out
+
+
+def format_forecast(fc: dict) -> str:
+    """把 forecast() 的返回值转成一行中文。已可递交 / current 时返回空串。"""
+    if fc.get("is_current") or fc.get("eligible"):
+        return ""
+    verb = "获批" if fc.get("chart") == "A" else "递交"
+    if fc.get("unavailable"):
+        return f"预测：该类别当前 Unavailable，暂无法估算可{verb}时间\n"
+    conf_zh = {"low": "低", "medium": "中", "high": "高"}.get(fc.get("confidence"), "未知")
+    me = fc.get("months_expected")
+    if me is None:
+        return f"预测：按当前推进速度，短期内难以排到可{verb}的位置（置信度{conf_zh}）\n"
+    opt, cons = fc.get("months_optimistic"), fc.get("months_conservative")
+    if opt is not None and cons is not None:
+        rng = f"（乐观 {opt:.0f} / 保守 {cons:.0f} 个月）"
+    elif opt is not None:
+        rng = f"（乐观约 {opt:.0f} 个月起）"
+    else:
+        rng = ""
+    pn, pr = fc.get("prob_current_next"), fc.get("prob_retrogress")
+    tail = ""
+    if pn is not None and pr is not None:
+        tail = f"；下期就轮到 ~{round(pn * 100)}%，退表风险 ~{round(pr * 100)}%"
+    return f"预测：按最近节奏约还需 {me:.0f} 个月可{verb}{rng}，置信度{conf_zh}{tail}\n"
+
+
 def format_movement(mov) -> str:
     if mov is None:
         return "无法与上期对比（缺少上期数据）"
@@ -104,11 +143,16 @@ def build_chart_section(year, month, chart, category, country, priority_date) ->
 
     movement = calc_movement_days(prev_cutoff, cur_cutoff)
 
+    fc = run_forecast(priority_date, category, country,
+                      load_recent_bulletins(year, month), chart)
+    forecast_line = format_forecast(fc)
+
     return (
         f"【Chart {chart} - {CHART_LABELS[chart]}】\n"
         f"本期截止日：{cur_cutoff}\n"
         f"月环比：{format_movement(movement)}\n"
         f"你的优先日 {priority_date} 状态：{format_gap(priority_date, cur_cutoff)}\n"
+        f"{forecast_line}"
     )
 
 

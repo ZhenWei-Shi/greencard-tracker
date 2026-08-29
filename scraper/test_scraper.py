@@ -4,7 +4,10 @@
 """
 
 import pytest
-from scraper import parse_date, normalize_country, normalize_category, detect_chart_type
+from scraper import (
+    parse_date, normalize_country, normalize_category, detect_chart_type,
+    nest_entries,
+)
 from bs4 import BeautifulSoup
 
 
@@ -118,6 +121,28 @@ class TestDetectChartType:
         soup = self._make_html("dates for filing applications")
         table = soup.find("table", id="target")
         assert detect_chart_type(table) == "B"
+
+
+# ---- nest_entries ----
+
+class TestNestEntries:
+    def test_folds_into_two_level_dict(self):
+        entries = [
+            {"category": "EB4", "country": "China", "cutoff_date": "2022-12-15"},
+            {"category": "EB4", "country": "ROW", "cutoff_date": "2022-12-15"},
+            {"category": "F2A", "country": "China", "cutoff_date": "Current"},
+        ]
+        nested = nest_entries(entries)
+        assert nested["EB4"]["China"] == "2022-12-15"
+        assert nested["EB4"]["ROW"] == "2022-12-15"
+        assert nested["F2A"]["China"] == "Current"
+
+    def test_preserves_none_values(self):
+        nested = nest_entries([{"category": "EB5", "country": "India", "cutoff_date": None}])
+        assert nested["EB5"]["India"] is None
+
+    def test_empty(self):
+        assert nest_entries([]) == {}
 
 
 # ---- 集成测试（真实网络，可跳过）----
