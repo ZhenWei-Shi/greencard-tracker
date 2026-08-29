@@ -11,7 +11,7 @@ import requests
 from datetime import datetime, timezone
 from bs4 import BeautifulSoup
 
-BASE_URL = "https://travel.state.gov"
+BASE_URL = "https://adoption.state.gov"
 BULLETIN_INDEX = f"{BASE_URL}/content/travel/en/legal/visa-law0/visa-bulletin.html"
 DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "data")
 
@@ -139,6 +139,16 @@ def get_bulletin_urls() -> list[dict]:
             if full not in seen:
                 seen.add(full)
                 urls.append({"url": full, "text": a.get_text(strip=True)})
+
+    # 索引页链接顺序不保证按时间排列（adoption.state.gov 镜像会把某些月份排在前面），
+    # 这里按公告的 年-月 从新到旧排序，保证 --history N 取到的是最新的 N 期。
+    def sort_key(item):
+        m = re.search(r"visa-bulletin-for-(\w+)-(\d{4})", item["url"])
+        if not m:
+            return (0, 0)
+        return (int(m.group(2)), MONTH_MAP.get(m.group(1).upper()[:3], 0))
+
+    urls.sort(key=sort_key, reverse=True)
     return urls
 
 
