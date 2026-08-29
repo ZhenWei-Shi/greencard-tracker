@@ -52,12 +52,16 @@ def find_cutoff(entries, category, country):
     return None
 
 
-def load_bulletin(year, month):
-    path = os.path.join(DATA_DIR, f"bulletin_{year}_{month:02d}.json")
+def load_data_json(name):
+    path = os.path.join(DATA_DIR, name)
     if not os.path.exists(path):
         return None
     with open(path, encoding="utf-8") as f:
         return json.load(f)
+
+
+def load_bulletin(year, month):
+    return load_data_json(f"bulletin_{year}_{month:02d}.json")
 
 
 def previous_month(year, month):
@@ -156,6 +160,68 @@ def build_chart_section(year, month, chart, category, country, priority_date) ->
     )
 
 
+def months_to_fy_reset(month: int) -> int:
+    """距下一个 10/1 财年重置还有几期（1–12）。"""
+    return (10 - month) % 12 or 12
+
+
+def category_retrogressed(year, month, category, country) -> bool:
+    """本期该类别/国家在 A 或 B 图是否出现后退 / 退出 Current。"""
+    cur, prev = load_bulletin(year, month), load_bulletin(*previous_month(year, month))
+    if not cur or not prev:
+        return False
+    for chart in ("a", "b"):
+        mov = calc_movement_days(
+            find_cutoff(prev.get(f"chart_{chart}", []), category, country),
+            find_cutoff(cur.get(f"chart_{chart}", []), category, country),
+        )
+        if mov and mov["type"] in ("retract", "lost_current"):
+            return True
+    return False
+
+
+def format_fiscal_year_note(month, retrogressed: bool) -> str:
+    m = months_to_fy_reset(month)
+    parts = []
+    if m <= 2:
+        parts.append(
+            f"距 10/1 财年重置还有 {m} 期——财年末名额收紧，小类别（含 EB4/SR）"
+            "此时最容易被退表或转 Unavailable，之后 10 月通常又放开。"
+        )
+    if retrogressed:
+        parts.append("本期你的类别已出现后退，重点关注下期动向。")
+    return ("【财年提示】\n" + "\n".join(parts) + "\n") if parts else ""
+
+
+def format_notices_section(year, month, category) -> str:
+    notices = (load_bulletin(year, month) or {}).get("notices") or []
+    if not notices:
+        return ""
+    cat_tag = category.split("-")[0].upper().replace("EB", "EB-")  # EB4-R -> EB-4
+    lines = ["【本期官方公告】"]
+    for nt in notices:
+        star = " ★" if cat_tag and cat_tag in nt["title"].upper() else ""
+        lines.append(f"[{nt['letter']}]{star} {nt['title']}")
+    c = next((n for n in notices if n["letter"] == "C"), None)
+    if c:
+        txt = c["text"][:600] + ("…" if len(c["text"]) > 600 else "")
+        lines += ["", f"  ({c['letter']}) {txt}"]
+    return "\n".join(lines) + "\n"
+
+
+def format_uscis_chart_note(category) -> str:
+    u = load_data_json("uscis_charts.json") or {}
+    if not u.get("month"):
+        return ""
+    is_family = category.upper().startswith("F")
+    which = u.get("family" if is_family else "employment")
+    if which not in ("A", "B"):
+        return ""
+    kind = "家庭类(family)" if is_family else "职业类(employment)"
+    label = "Chart A / Final Action Dates" if which == "A" else "Chart B / Dates for Filing"
+    return f"【USCIS 递交表】{u['month']}：境内交 I-485，{kind}这个月用 {label}\n"
+
+
 def build_message(year, month) -> tuple[str, str]:
     category = os.environ["NOTIFY_CATEGORY"]
     country = os.environ["NOTIFY_COUNTRY"]
@@ -166,7 +232,17 @@ def build_message(year, month) -> tuple[str, str]:
         build_chart_section(year, month, chart, category, country, priority_date)
         for chart in ("A", "B")
     ]
+    retro = category_retrogressed(year, month, category, country)
+    tail = "\n".join(
+        s for s in (
+            format_uscis_chart_note(category),
+            format_fiscal_year_note(month, retro),
+            format_notices_section(year, month, category),
+        ) if s
+    )
     body = f"{subject}\n\n类别：{category}  国家：{country}\n\n" + "\n".join(sections)
+    if tail:
+        body += "\n" + tail
     return subject, body
 
 

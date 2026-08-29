@@ -927,5 +927,37 @@
       "Mexico": "Current",
       "Philippines": "Current"
     }
-  }
+  },
+  "notices": [
+    {
+      "letter": "C",
+      "title": "AVAILABILITY OF FAMILY-SPONSORED AND EMPLOYMENT-BASED VISAS",
+      "text": "Immigrant visa issuance rates for aliens from certain countries have decreased in light of various actions the administration has taken to protect national security and public safety, and to otherwise advance the interests of the United States (e.g. Presidential Proclamation 10949, Presidential Proclamation 10998, Immigrant Visa Processing Updates). Consequently, to make visas available in accordance with sections 201-203 of the INA to sufficient prospective immigrants from other countries to use immigrant visa numbers that are available in FY 2026, dates for filing and final action dates have been advanced across various immigrant visa categories throughout recent months. Note that as additional immigrant visa demand materializes, or administration actions are amended, retrogression may be necessary in the upcoming months to keep issuances within annual limits. Visa categories may become “Unavailable” prior to the end of the fiscal year if annual limits, category limits, or pro-rated per-country limits are reached. This situation is being continually monitored, and any necessary adjustments will be made accordingly."
+    },
+    {
+      "letter": "D",
+      "title": "DETERMINATION OF THE NUMERICAL LIMITS ON IMMIGRANTS REQUIRED UNDER THE TERMS OF THE IMMIGRATION AND NATIONALITY ACT (INA)",
+      "text": "The State Department is required to make the determination of the worldwide numerical limitations, as outlined in Section 201(c) and (d) of the INA, on an annual basis. These calculations are based in part on data provided by U.S. Citizen and Immigration Services (USCIS) regarding the number of immediate relative adjustments in the preceding year and the number of aliens paroled into the United States under Section 212(d)(5) in the second preceding year. Without this information, it is impossible to make an official determination of the annual limits. To avoid delays in processing while waiting for the USCIS data, the Visa Office (VO) bases allocations on reasonable estimates of the anticipated amount of visa numbers to be available under the annual limits, in accordance with Section 203(g) of the INA. On July 24th, USCIS provided the required data to the VO. The Department of State has determined the Family and Employment preference numerical limits for FY-2026 in accordance with the terms of Section 201 of the INA. These numerical limitations for FY-2026 are as follows: Worldwide Family-Sponsored preference limit: 226,000 Worldwide Employment-Based preference limit: 186,317 Under INA Section 202(a)(2), the per-country limit is fixed at 7% of the combined total family and employment annual limits. For FY-2026 the per-country limit is therefore 28,862. The dependent area annual limit is 2%, or 8,247. Note that these figures do not account for carryover provisions in accordance with INA 203(b)(5)(B). With these carryover visa numbers included, the per-country limit is 29,136 and the dependent area limit is 8,325."
+    },
+    {
+      "letter": "E",
+      "title": "VISA AVAILABILITY IN THE EMPLOYMENT-BASED FIRST PREFERENCE (EB-1) FINAL ACTION DATE FOR INDIA",
+      "text": "High demand and number use by aliens chargeable to India in the EB-1 visa category may necessitate making the category unavailable in the coming weeks if India’s pro-rated limit in the EB-1 category is reached before the fiscal year ends. This situation will be continually monitored, and any necessary adjustments will be made accordingly."
+    },
+    {
+      "letter": "F",
+      "title": "VISA AVAILABILITY IN THE EMPLOYMENT-BASED SECOND PREFERENCE (EB-2) CATEGORY",
+      "text": "Sufficient demand and increased number use in the EB-2 visa category may make it necessary to retrogress the final action date or make the category unavailable before the end of the fiscal year to hold number use within the maximum allowed under the FY 2026 annual limit. This situation will be continually monitored, and any necessary adjustments will be made accordingly."
+    },
+    {
+      "letter": "G",
+      "title": "VISA AVAILABILITY IN THE EMPLOYMENT-BASED FIFTH PREFERENCE UNRESERVED (EB-5) CATEGORY",
+      "text": "Sufficient demand and increased number use in the EB-5 unreserved visa category may make it necessary to retrogress the final action date or make the category unavailable before the end of the fiscal year to hold number use within the maximum allowed under the FY 2026 annual limit. This situation will be continually monitored, and any necessary adjustments will be made accordingly."
+    },
+    {
+      "letter": "H",
+      "title": "U.S. GOVERNMENT EMPLOYEE SPECIAL IMMIGRANT VISAS (SIVs)",
+      "text": "The National Defense Authorization Act (NDAA) for Fiscal Year 2024, signed into law on December 22, 2023, may affect certain current and former employees of the U.S. Government abroad, as well as certain surviving spouses and children of deceased employees of the U.S. government abroad, applying for SIVs or adjustment of status, as described in section 101(a)(27)(D) of the INA. This does not affect certain Iraqis and Afghans applying for SQ and SI SIVs. Applicants should contact the consular section at which they filed their Form DS‑1884 for further information on the impact of that law on their case."
+    }
+  ]
 }

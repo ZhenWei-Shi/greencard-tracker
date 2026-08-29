@@ -152,6 +152,52 @@ def get_bulletin_urls() -> list[dict]:
     return urls
 
 
+# 公告正文里，字母小节（C. D. E. …）之后的这些字样表示已经进到页脚 / 弹窗，停止抓取
+NOTICE_STOP_MARKERS = (
+    "Department of State Publication", "External Link", "You are about to leave",
+    "CA/VO:", "Travel.State.Gov", "Congressional Liaison",
+)
+
+
+def extract_notices(soup) -> list[dict]:
+    """抓公告尾部的字母小节（C. AVAILABILITY… / E. EB-1 India / F. EB-2 …），
+    这些是决定类别走向的政策提示，比表格数字更早给信号。返回 [{letter, title, text}]。
+
+    结构：`C.` 单独一行 → 下一行是标题 → 之后是正文，直到下一个 `字母.` 行或页脚标记。
+    只在 DV 抽签章节之后找，避开前面表格用的 A./B.。
+    """
+    text = soup.get_text("\n").replace("\xa0", " ")
+    text = re.sub(r"[ \t]+", " ", text)
+    text = re.sub(r" ?\n ?", "\n", text)
+    lines = [ln for ln in (x.strip() for x in text.split("\n")) if ln]
+
+    start = 0
+    for i, ln in enumerate(lines):
+        up = ln.upper()
+        if ("DIVERSITY IMMIGRANT" in up and "DV" in up) or ("203(C)" in up and "55,000" in up):
+            start = i
+            break
+
+    notices, i, n = [], start, len(lines)
+    while i < n:
+        m = re.match(r"^([C-Z])\.$", lines[i])
+        if not m or i + 1 >= n:
+            i += 1
+            continue
+        letter, title = m.group(1), lines[i + 1]
+        body, j = [], i + 2
+        while j < n:
+            if re.match(r"^([C-Z])\.$", lines[j]) or any(s in lines[j] for s in NOTICE_STOP_MARKERS):
+                break
+            body.append(lines[j])
+            j += 1
+        joined = re.sub(r"\s+([,.)])", r"\1", " ".join(body)).strip()
+        if title and joined and len(title) < 200:
+            notices.append({"letter": letter, "title": title, "text": joined})
+        i = j
+    return notices
+
+
 def nest_entries(entries: list[dict]) -> dict:
     """把扁平的 [{category, country, cutoff_date}] 折叠成 {类别: {国家: 值}} 两层对象，
     方便前端 / 预测直接寻址（data.final_action['EB4']['China']），不用再遍历 find。"""
@@ -205,6 +251,7 @@ def parse_bulletin_page(url: str) -> dict | None:
     # 值仍是三态：日期字符串 / "Current" / null。
     result["final_action"] = nest_entries(result["chart_a"])
     result["filing"] = nest_entries(result["chart_b"])
+    result["notices"] = extract_notices(soup)
 
     return result
 
@@ -243,6 +290,24 @@ def rebuild_index():
             f, indent=2,
         )
     print(f"index.json 已更新，共 {len(index)} 期")
+
+    ensure_uscis_charts_stub()
+
+
+def ensure_uscis_charts_stub():
+    """USCIS 每月决定境内 I-485 用哪张表，这是独立于签证公告的信息、无法从公告抓，
+    只能手动维护。这里只保证文件存在（不覆盖已有内容），免得前端 / API 404。"""
+    path = os.path.join(DATA_DIR, "uscis_charts.json")
+    if os.path.exists(path):
+        return
+    stub = {
+        "_note": "手动维护。每月 USCIS 在 https://www.uscis.gov/visabulletininfo 公布后更新。"
+                 "A = Final Action Dates, B = Dates for Filing。",
+        "updated": None, "month": None, "family": None, "employment": None,
+    }
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(stub, f, ensure_ascii=False, indent=2)
+    print("已创建 uscis_charts.json 占位文件（需手动填写）")
 
 
 def get_latest_from_index():

@@ -40,5 +40,13 @@ def api_bulletin(year, month):
     return jsonify(data)
 
 
+@app.get("/api/uscis-charts")
+def api_uscis_charts():
+    data = load_json("uscis_charts.json")
+    if data is None:
+        return jsonify({"error": "uscis_charts.json not found"}), 404
+    return jsonify(data)
+
+
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=5001)
