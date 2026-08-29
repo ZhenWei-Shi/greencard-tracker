@@ -281,6 +281,8 @@ def forecast(priority_date: str, category: str, country: str, bulletins,
             near = _fallback_long_rate(category, country)
 
     result["avg_pace_days_per_month"] = round(near, 1)
+    # 前端走势图用这几个值把 cutoff 线往未来外推（见 index.html renderTrend）
+    result["paces"] = {"near": near, "recent": recent, "mid": mid, "long_": long_}
 
     def scenario(mult):
         return months_to_current(

@@ -6,137 +6,159 @@
   <title>Green Card Priority Date Tracker</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
+    /* ---- 设计 token：4 组语义色（base / 浅底 bg / 深字 ink）+ 中性色。组件只引 token ---- */
     :root {
-      --green: #2e7d32;
-      --green-light: #e8f5e9;
-      --yellow: #f57f17;
-      --yellow-light: #fff8e1;
-      --red: #c62828;
-      --red-light: #ffebee;
-      --gray: #546e7a;
-      --bg: #f5f7fa;
-      --card: #ffffff;
-      --border: #e0e0e0;
+      --ok:        #2e7d32;  --ok-bg:   #e8f5e9;  --ok-ink:   #1b5e20;
+      --warn:      #ef6c00;  --warn-bg: #fff3e0;  --warn-ink: #e65100;
+      --bad:       #c62828;  --bad-bg:  #ffebee;  --bad-ink:  #b71c1c;
+      --info:      #1565c0;  --info-bg: #e3f2fd;  --info-ink: #0d47a1;
+
+      --bg:        #f5f7fa;   /* 页面底 */
+      --surface:   #ffffff;   /* 卡片面 */
+      --surface-2: #f0f4f8;   /* 次级面：表头、chip */
+      --border:    #e2e6ea;
+      --border-soft: #eef1f4;
+      --ink:       #263238;   /* 正文 */
+      --ink-soft:  #4a5964;   /* 次要文字 */
+      --muted:     #8a99a4;   /* 弱化 / 注脚 */
+      --on-brand:  #ffffff;   /* 品牌色上的文字 */
+
+      --brand:     var(--ok); /* 顶栏 / 主按钮统一走「正向绿」 */
     }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --ok:        #66bb6a;  --ok-bg:   #17301c;  --ok-ink:   #a5d6a7;
+        --warn:      #ffa726;  --warn-bg: #33280f;  --warn-ink: #ffcc80;
+        --bad:       #ef5350;  --bad-bg:  #391f1f;  --bad-ink:  #ef9a9a;
+        --info:      #42a5f5;  --info-bg: #16283a;  --info-ink: #90caf9;
+
+        --bg:        #10151a;
+        --surface:   #1a2129;
+        --surface-2: #222c35;
+        --border:    #2c3841;
+        --border-soft: #232d36;
+        --ink:       #e2e8ec;
+        --ink-soft:  #b3c0c8;
+        --muted:     #7d8c96;
+        --on-brand:  #0d1f12;
+
+        --brand:     #2e7d32;
+      }
+    }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: #263238; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg); color: var(--ink);
+    }
 
     header {
-      background: var(--green);
-      color: #fff;
+      background: var(--brand); color: var(--on-brand);
       padding: 14px 20px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
     }
     header .title-group { display: flex; align-items: center; gap: 10px; flex: 1; }
     header h1 { font-size: 1.1rem; font-weight: 600; }
-    header small { background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 12px; font-size: 0.72rem; white-space: nowrap; }
+    header small { background: rgba(255,255,255,0.18); padding: 2px 8px; border-radius: 12px; font-size: 0.72rem; white-space: nowrap; }
 
     .lang-switcher { display: flex; gap: 4px; }
     .lang-btn {
-      background: rgba(255,255,255,0.15);
-      border: 1px solid rgba(255,255,255,0.35);
-      color: #fff;
-      padding: 4px 10px;
-      border-radius: 16px;
-      font-size: 0.78rem;
-      cursor: pointer;
-      font-weight: 500;
+      background: rgba(255,255,255,0.14);
+      border: 1px solid rgba(255,255,255,0.32);
+      color: var(--on-brand);
+      padding: 4px 10px; border-radius: 16px;
+      font-size: 0.78rem; cursor: pointer; font-weight: 500;
       transition: background 0.15s;
     }
-    .lang-btn:hover { background: rgba(255,255,255,0.28); }
-    .lang-btn.active { background: rgba(255,255,255,0.9); color: var(--green); font-weight: 700; }
+    .lang-btn:hover { background: rgba(255,255,255,0.26); }
+    .lang-btn.active { background: rgba(255,255,255,0.92); color: var(--brand); font-weight: 700; }
 
     .container { max-width: 900px; margin: 0 auto; padding: 18px 14px; }
 
-    .card { background: var(--card); border-radius: 12px; border: 1px solid var(--border); padding: 18px; margin-bottom: 14px; }
-    .card-title { font-size: 0.78rem; font-weight: 700; color: var(--gray); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 14px; }
+    .card { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); padding: 18px; margin-bottom: 14px; }
+    .card-title { font-size: 0.78rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 14px; }
 
     .status-box { border-radius: 10px; padding: 16px; margin-bottom: 14px; border-left: 5px solid; }
-    .s-green { background: var(--green-light); border-color: var(--green); }
-    .s-yellow { background: var(--yellow-light); border-color: var(--yellow); }
-    .s-red { background: var(--red-light); border-color: var(--red); }
-    .status-box .lbl { font-size: 0.8rem; color: var(--gray); margin-bottom: 4px; }
+    .s-green  { background: var(--ok-bg);   border-color: var(--ok); }
+    .s-yellow { background: var(--warn-bg); border-color: var(--warn); }
+    .s-red    { background: var(--bad-bg);  border-color: var(--bad); }
+    .status-box .lbl { font-size: 0.8rem; color: var(--ink-soft); margin-bottom: 4px; }
     .status-box .big { font-size: 1.6rem; font-weight: 700; }
-    .status-box .detail { font-size: 0.88rem; margin-top: 5px; color: #444; }
+    .status-box .detail { font-size: 0.88rem; margin-top: 5px; color: var(--ink-soft); }
 
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     @media(max-width:480px){ .form-row { grid-template-columns: 1fr; } }
-    label { display: block; font-size: 0.78rem; color: var(--gray); font-weight: 600; margin-bottom: 3px; }
+    label { display: block; font-size: 0.78rem; color: var(--ink-soft); font-weight: 600; margin-bottom: 3px; }
     select, input[type=date], input[type=number] {
       width: 100%; padding: 8px 10px;
       border: 1px solid var(--border); border-radius: 7px;
-      font-size: 0.9rem; background: #fafafa;
+      font-size: 0.9rem; background: var(--bg); color: var(--ink);
     }
-    select:focus, input:focus { outline: none; border-color: var(--green); }
+    select:focus, input:focus { outline: 2px solid var(--brand); outline-offset: 1px; border-color: var(--brand); }
 
-    .btn { background: var(--green); color: #fff; border: none; padding: 9px 18px; border-radius: 7px; font-size: 0.9rem; cursor: pointer; font-weight: 600; }
-    .btn:hover { opacity: .87; }
+    .btn { background: var(--brand); color: var(--on-brand); border: none; padding: 9px 18px; border-radius: 7px; font-size: 0.9rem; cursor: pointer; font-weight: 600; }
+    .btn:hover { opacity: .9; }
+    .btn:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
     .btn-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 12px; }
 
     .tabs { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
-    .tab { padding: 5px 14px; border-radius: 18px; border: 1px solid var(--border); cursor: pointer; font-size: 0.84rem; background: #fff; white-space: nowrap; }
-    .tab.on { background: var(--green); color: #fff; border-color: var(--green); }
+    .tab { padding: 5px 14px; border-radius: 18px; border: 1px solid var(--border); cursor: pointer; font-size: 0.84rem; background: var(--surface); color: var(--ink); white-space: nowrap; }
+    .tab.on { background: var(--brand); color: var(--on-brand); border-color: var(--brand); }
 
-    .chart-box { height: 260px; position: relative; }
+    .chart-box { height: 280px; position: relative; }
 
     .tbl { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
-    .tbl th { background: #f0f4f8; padding: 7px 10px; text-align: left; font-size: 0.75rem; font-weight: 700; color: var(--gray); border-bottom: 2px solid var(--border); }
-    .tbl td { padding: 7px 10px; border-bottom: 1px solid #f5f5f5; }
+    .tbl th { background: var(--surface-2); padding: 7px 10px; text-align: left; font-size: 0.75rem; font-weight: 700; color: var(--muted); border-bottom: 2px solid var(--border); }
+    .tbl td { padding: 7px 10px; border-bottom: 1px solid var(--border-soft); }
     .tbl tr:last-child td { border: none; }
-    .tag-c { background: #c8e6c9; color: #1b5e20; padding: 1px 7px; border-radius: 9px; font-size: 0.75rem; font-weight: 700; }
-    .tag-u { background: #fce4ec; color: #880e4f; padding: 1px 7px; border-radius: 9px; font-size: 0.75rem; }
+    .tag-c { background: var(--ok-bg); color: var(--ok-ink); padding: 1px 7px; border-radius: 9px; font-size: 0.75rem; font-weight: 700; }
+    .tag-u { background: var(--bad-bg); color: var(--bad-ink); padding: 1px 7px; border-radius: 9px; font-size: 0.75rem; }
     .mov { display: block; font-size: 0.7rem; margin-top: 2px; font-weight: 600; }
-    .mov-up   { color: #2e7d32; }
-    .mov-down { color: #c62828; }
-    .mov-same { color: #90a4ae; font-weight: 400; }
+    .mov-up   { color: var(--ok); }
+    .mov-down { color: var(--bad); }
+    .mov-same { color: var(--muted); font-weight: 400; }
 
     /* forecast card */
-    .fc-row { padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+    .fc-row { padding: 10px 0; border-bottom: 1px solid var(--border-soft); }
     .fc-row:last-of-type { border-bottom: none; }
-    .fc-label { font-size: 0.78rem; color: var(--gray); font-weight: 600; margin-bottom: 3px; }
+    .fc-label { font-size: 0.78rem; color: var(--ink-soft); font-weight: 600; margin-bottom: 3px; }
     .fc-big { font-size: 1.2rem; font-weight: 700; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .fc-big.fc-ok { color: var(--green); }
-    .fc-big.fc-bad { color: var(--red); }
-    .fc-sub { font-size: 0.82rem; color: #666; margin-top: 2px; }
+    .fc-big.fc-ok { color: var(--ok); }
+    .fc-big.fc-bad { color: var(--bad); }
+    .fc-sub { font-size: 0.82rem; color: var(--ink-soft); margin-top: 2px; }
     .fc-pill { font-size: 0.68rem; font-weight: 700; padding: 2px 8px; border-radius: 10px; text-transform: uppercase; letter-spacing: .04em; }
-    .fc-pill-high   { background: var(--green-light); color: var(--green); }
-    .fc-pill-medium { background: var(--yellow-light); color: var(--yellow); }
-    .fc-pill-low    { background: #eceff1; color: var(--gray); }
-    .fc-note { font-size: 0.72rem; color: #aaa; margin-top: 10px; line-height: 1.5; }
+    .fc-pill-high   { background: var(--ok-bg);   color: var(--ok-ink); }
+    .fc-pill-medium { background: var(--warn-bg); color: var(--warn-ink); }
+    .fc-pill-low    { background: var(--surface-2); color: var(--muted); }
+    .fc-note { font-size: 0.72rem; color: var(--muted); margin-top: 10px; line-height: 1.5; }
 
     /* small inline notes */
     .note-strip {
       border-radius: 8px; padding: 10px 14px; margin-bottom: 14px;
-      font-size: 0.84rem; border-left: 4px solid var(--gray); background: #f4f6f8;
+      font-size: 0.84rem; border-left: 4px solid var(--info); background: var(--info-bg); color: var(--ink);
     }
-    .note-strip.warn { border-color: var(--yellow); background: var(--yellow-light); }
+    .note-strip.warn { border-color: var(--warn); background: var(--warn-bg); }
     .note-strip b { font-weight: 700; }
-    .note-strip .sub { display: block; font-size: 0.72rem; color: #999; margin-top: 3px; }
+    .note-strip .sub { display: block; font-size: 0.72rem; color: var(--muted); margin-top: 3px; }
 
     /* notices */
     .notices-head { display: flex; align-items: center; gap: 8px; cursor: pointer; }
-    .notices-head .chev { color: var(--gray); font-size: 0.8rem; transition: transform .15s; }
+    .notices-head .chev { color: var(--muted); font-size: 0.8rem; transition: transform .15s; }
     .notices-head.open .chev { transform: rotate(90deg); }
-    .notice-item { padding: 10px 0; border-bottom: 1px solid #f0f0f0; font-size: 0.84rem; }
+    .notice-item { padding: 10px 0; border-bottom: 1px solid var(--border-soft); font-size: 0.84rem; }
     .notice-item:last-child { border-bottom: none; }
     .notice-item .n-title { font-weight: 700; margin-bottom: 3px; }
-    .notice-item .n-title .n-letter { color: var(--gray); font-weight: 400; margin-right: 4px; }
-    .notice-item.hit { background: var(--yellow-light); margin: 0 -8px; padding: 10px 8px; border-radius: 6px; }
-    .notice-item .n-text { color: #555; line-height: 1.55; }
+    .notice-item .n-title .n-letter { color: var(--muted); font-weight: 400; margin-right: 4px; }
+    .notice-item.hit { background: var(--warn-bg); margin: 0 -8px; padding: 10px 8px; border-radius: 6px; }
+    .notice-item .n-text { color: var(--ink-soft); line-height: 1.55; }
 
-    .msg { text-align: center; color: #aaa; padding: 28px 0; font-size: 0.88rem; }
-    #update-time { font-size: 0.75rem; color: #aaa; margin-top: 8px; }
+    .msg { text-align: center; color: var(--muted); padding: 28px 0; font-size: 0.88rem; }
+    #update-time { font-size: 0.75rem; color: var(--muted); margin-top: 8px; }
 
-    footer {
-      text-align: center;
-      padding: 24px 16px;
-      font-size: 0.78rem;
-      color: #90a4ae;
-    }
-    footer a { color: #90a4ae; }
+    footer { text-align: center; padding: 24px 16px; font-size: 0.78rem; color: var(--muted); }
+    footer a { color: var(--muted); }
+
+    @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
   </style>
 </head>
 <body>
@@ -312,6 +334,7 @@ const I18N = {
     opt_chart_b: "Chart B – Dates for Filing",
     chart_label_cutoff: "Cutoff Date",
     chart_label_my_pd: "My Priority Date",
+    chart_label_projection: "Projection (current pace)",
     mov_vs_last: "vs. last month:",
     mov_advance: "↑ {n} days",
     mov_retract: "↓ {n} days",
@@ -390,6 +413,7 @@ const I18N = {
     opt_chart_b: "Chart B – 可递交日期",
     chart_label_cutoff: "排期截止日",
     chart_label_my_pd: "我的 Priority Date",
+    chart_label_projection: "按当前节奏外推",
     mov_vs_last: "较上月：",
     mov_advance: "↑ 前进 {n} 天",
     mov_retract: "↓ 后退 {n} 天",
@@ -468,6 +492,7 @@ const I18N = {
     opt_chart_b: "Tabla B – Fechas para Presentar",
     chart_label_cutoff: "Fecha de Corte",
     chart_label_my_pd: "Mi Fecha Prioritaria",
+    chart_label_projection: "Proyección (ritmo actual)",
     mov_vs_last: "vs. mes anterior:",
     mov_advance: "↑ {n} días",
     mov_retract: "↓ {n} días",
@@ -504,6 +529,14 @@ const I18N = {
 };
 
 let lang = localStorage.getItem("gc_lang") || "en";
+
+// 读 CSS token 当前值（随明暗主题变化），供 Chart.js 等 JS 里用色
+function cssVar(name, fallback) {
+  try {
+    const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    return v || fallback;
+  } catch { return fallback; }
+}
 
 function t(key, vars) {
   let s = (I18N[lang] || I18N.en)[key] || key;
@@ -764,6 +797,7 @@ function forecast(priorityDate, category, country, bulletins, chart, today) {
     near = recent > 0 ? recent : (long_ > 0 ? long_ : fcFallbackLong(category, country));
   }
   res.avg_pace_days_per_month = Math.round(near * 10) / 10;
+  res.paces = { near, recent, mid, long_ };   // 供走势图外推用
   const scen = (mult) => fcMonthsToCurrent(distance, Math.max(near * mult, 0), Math.max(recent, 0), Math.max(mid, 0), Math.max(long_, 0));
   res.months_expected = scen(1.0);
   res.months_optimistic = scen(1.5);
@@ -898,7 +932,7 @@ async function renderNotices(p) {
       this.nextElementSibling.style.display = this.classList.contains('open') ? 'block' : 'none';">
       <span class="chev">▶</span>
       <span class="card-title" style="margin:0">${t("notices_title")}</span>
-      <span style="font-size:0.76rem;color:#999">${t("notices_toggle", { n: notices.length })}</span>
+      <span style="font-size:0.76rem;color:var(--muted)">${t("notices_toggle", { n: notices.length })}</span>
     </div>
     <div style="display:none;margin-top:10px">${items}</div>
   </div>`;
@@ -996,7 +1030,7 @@ async function renderMyStatus(p) {
   // movement vs previous month
   const prevRow = prev ? (prev[chart_key] || []).find(e => e.category === p.category && e.country === p.country) : null;
   const mov = calcMovement(prevRow?.cutoff_date, cutoff);
-  const movHtml = mov ? `<br><span style="font-size:0.82rem;color:#546e7a">${t("mov_vs_last")} </span>${formatMovement(mov)}` : "";
+  const movHtml = mov ? `<br><span style="font-size:0.82rem;color:var(--ink-soft)">${t("mov_vs_last")} </span>${formatMovement(mov)}` : "";
 
   const yr = b.year, mo = String(b.month).padStart(2, "0");
   el.innerHTML = `
@@ -1010,71 +1044,126 @@ async function renderMyStatus(p) {
 // ============================================================
 // Trend chart
 // ============================================================
+function addMonths(label, k) {          // "2026-09" + k -> "YYYY-MM"
+  const [y, m] = label.split("-").map(Number);
+  const t = y * 12 + (m - 1) + k;
+  return `${Math.floor(t / 12)}-${String(t % 12 + 1).padStart(2, "0")}`;
+}
+
 async function renderTrend(p) {
   const msg = document.getElementById("chart-msg");
   if (!p.priority_date || !DATA.index) { msg.style.display = "block"; return; }
 
   const chart_key = "chart_" + (p.chart || "A").toLowerCase();
   const history = [];
-
   for (const item of [...DATA.index.bulletins].reverse()) {
     const b = await getBulletin(item.year, item.month);
     if (!b) continue;
     const row = (b[chart_key] || []).find(e => e.category === p.category && e.country === p.country);
     history.push({
       label: `${item.year}-${String(item.month).padStart(2, "0")}`,
-      value: row?.cutoff_date && row.cutoff_date !== "Current" ? new Date(row.cutoff_date).getTime() : null,
+      value: row?.cutoff_date && row.cutoff_date !== "Current" ? new Date(row.cutoff_date + "T00:00:00Z").getTime() : null,
     });
   }
-
   msg.style.display = history.length ? "none" : "block";
   if (!history.length) return;
 
-  const pdMs = new Date(p.priority_date).getTime();
+  const pdMs = new Date(p.priority_date + "T00:00:00Z").getTime();
+
+  // ---- 用预测把 cutoff 线往未来延伸，让"交叉点"可见 ----
+  const bulletins = await loadAllBulletins();
+  const fc = forecast(p.priority_date, p.category, p.country, bulletins, p.chart || "A");
+  const lastLabel = history[history.length - 1].label;
+  const lastVal = [...history].reverse().find(h => h.value != null)?.value ?? null;
+
+  let projLabels = [], projData = [];
+  if (lastVal != null && fc.paces && !fc.eligible && !fc.is_current) {
+    const { near, recent, mid, long_ } = fc.paces;
+    const horizon = Math.min(Math.ceil((fc.months_expected ?? 18) + 3), 30);
+    for (let k = 1; k <= horizon; k++) {
+      projLabels.push(addMonths(lastLabel, k));
+      projData.push(lastVal + fcCumulative(k, Math.max(near, 0), Math.max(recent, 0), Math.max(mid, 0), Math.max(long_, 0)) * DAY);
+    }
+  }
+
+  const labels = [...history.map(h => h.label), ...projLabels];
+  const histLen = history.length;
+
+  // ---- 自动缩放到交叉点前后 ----
+  let crossIdx = labels.findIndex((_, i) => {
+    const v = i < histLen ? history[i].value : projData[i - histLen];
+    return v != null && v >= pdMs;
+  });
+  if (crossIdx < 0) crossIdx = labels.length - 1;
+  // 让窗口既能看到交叉点，也保留至少最近 6 期真实数据
+  const minIdx = Math.max(0, Math.min(crossIdx - 12, histLen - 6));
+  const winMin = labels[minIdx];
+  const winMax = labels[Math.min(labels.length - 1, crossIdx + 3)];
+
+  const cOk = cssVar("--ok", "#2e7d32");
+  const cWarn = cssVar("--warn", "#ef6c00");
+  const cGrid = cssVar("--border", "#e2e6ea");
+  const cTick = cssVar("--muted", "#8a99a4");
+
   const ctx = document.getElementById("trend-chart").getContext("2d");
   if (trendChart) trendChart.destroy();
 
   trendChart = new Chart(ctx, {
     type: "line",
     data: {
-      labels: history.map(h => h.label),
+      labels,
       datasets: [
         {
           label: t("chart_label_cutoff"),
-          data: history.map(h => h.value),
-          borderColor: "#2e7d32",
-          backgroundColor: "rgba(46,125,50,0.07)",
-          tension: 0.3,
-          pointRadius: 4,
-          fill: true,
+          data: history.map(h => h.value).concat(projData.map(() => null)),
+          borderColor: cOk,
+          backgroundColor: "transparent",
+          tension: 0.25, pointRadius: 3, borderWidth: 2,
+        },
+        {
+          label: t("chart_label_projection"),
+          data: (() => {
+            const s = history.map(() => null);
+            if (lastVal != null && projData.length) s[histLen - 1] = lastVal;  // 虚线从实线末端接上
+            return s.concat(projData);
+          })(),
+          borderColor: cOk, borderDash: [3, 3], borderWidth: 1.5,
+          pointRadius: 0, tension: 0.25,
         },
         {
           label: t("chart_label_my_pd"),
-          data: history.map(() => pdMs),
-          borderColor: "#f57f17",
-          borderDash: [5, 4],
-          borderWidth: 1.5,
-          pointRadius: 0,
-          fill: false,
+          data: labels.map(() => pdMs),
+          borderColor: cWarn, borderDash: [5, 4], borderWidth: 1.5,
+          pointRadius: 0, fill: false,
         },
       ],
     },
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
+      responsive: true, maintainAspectRatio: false,
+      animation: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? false : undefined,
+      interaction: { mode: "index", intersect: false },
       scales: {
+        x: { min: winMin, max: winMax, grid: { color: cGrid }, ticks: { color: cTick, maxRotation: 0, autoSkipPadding: 12 } },
         y: {
-          ticks: { callback: v => v ? new Date(v).toISOString().slice(0, 7) : "" }
-        }
+          grid: { color: cGrid },
+          ticks: { color: cTick, callback: v => v ? new Date(v).toISOString().slice(0, 7) : "" },
+        },
       },
       plugins: {
+        legend: { labels: { color: cTick, boxWidth: 12, font: { size: 11 } } },
         tooltip: {
           callbacks: {
-            label: c => c.raw ? new Date(c.raw).toISOString().slice(0, 10) : "—"
-          }
-        }
-      }
-    }
+            title: items => items[0]?.label ?? "",
+            label: c => {
+              const v = c.parsed.y;
+              if (v == null) return null;
+              const iso = new Date(v).toISOString().slice(0, 10);
+              return `${c.dataset.label}: ${iso}`;
+            },
+          },
+        },
+      },
+    },
   });
 }
 
