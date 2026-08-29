@@ -107,6 +107,26 @@
     .fc-pill-low    { background: #eceff1; color: var(--gray); }
     .fc-note { font-size: 0.72rem; color: #aaa; margin-top: 10px; line-height: 1.5; }
 
+    /* small inline notes */
+    .note-strip {
+      border-radius: 8px; padding: 10px 14px; margin-bottom: 14px;
+      font-size: 0.84rem; border-left: 4px solid var(--gray); background: #f4f6f8;
+    }
+    .note-strip.warn { border-color: var(--yellow); background: var(--yellow-light); }
+    .note-strip b { font-weight: 700; }
+    .note-strip .sub { display: block; font-size: 0.72rem; color: #999; margin-top: 3px; }
+
+    /* notices */
+    .notices-head { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    .notices-head .chev { color: var(--gray); font-size: 0.8rem; transition: transform .15s; }
+    .notices-head.open .chev { transform: rotate(90deg); }
+    .notice-item { padding: 10px 0; border-bottom: 1px solid #f0f0f0; font-size: 0.84rem; }
+    .notice-item:last-child { border-bottom: none; }
+    .notice-item .n-title { font-weight: 700; margin-bottom: 3px; }
+    .notice-item .n-title .n-letter { color: var(--gray); font-weight: 400; margin-right: 4px; }
+    .notice-item.hit { background: var(--yellow-light); margin: 0 -8px; padding: 10px 8px; border-radius: 6px; }
+    .notice-item .n-text { color: #555; line-height: 1.55; }
+
     .msg { text-align: center; color: #aaa; padding: 28px 0; font-size: 0.88rem; }
     #update-time { font-size: 0.75rem; color: #aaa; margin-top: 8px; }
 
@@ -185,8 +205,14 @@
   <!-- Status -->
   <div id="my-status"></div>
 
+  <!-- USCIS filing chart this month -->
+  <div id="uscis-note"></div>
+
   <!-- Forecast -->
   <div id="my-forecast"></div>
+
+  <!-- Fiscal-year / retrogression watch -->
+  <div id="fy-note"></div>
 
   <!-- Trend chart -->
   <div class="card">
@@ -196,6 +222,9 @@
       <p id="chart-msg" class="msg" data-i18n="chart_empty">Enter your priority date above to see the trend</p>
     </div>
   </div>
+
+  <!-- Official notices -->
+  <div id="notices-block"></div>
 
   <!-- Current bulletin overview -->
   <div class="card">
@@ -304,6 +333,17 @@ const I18N = {
     fc_unavailable: "Category Unavailable",
     fc_never: "Not reachable at the current pace",
     fc_disclaimer: "Statistical estimate from historical movement only. Policy changes, the Oct 1 fiscal-year reset, or demand surges will change this.",
+    fy_reset_soon: "Fiscal year resets Oct 1 — {n} month(s) away. Small categories often retrogress or go Unavailable near year-end.",
+    fy_retro_watch: "Your category retrogressed this month — watch next month's bulletin.",
+    uscis_title: "USCIS filing chart this month",
+    uscis_line: "To file I-485 from inside the U.S., {kind} uses {chart} this month.",
+    uscis_kind_emp: "employment-based",
+    uscis_kind_fam: "family-based",
+    uscis_chart_a: "Chart A (Final Action Dates)",
+    uscis_chart_b: "Chart B (Dates for Filing)",
+    uscis_note: "Manually maintained — the authority is uscis.gov/visabulletininfo.",
+    notices_title: "Official notices",
+    notices_toggle: "{n} this month",
   },
   zh: {
     title: "绿卡排期追踪",
@@ -371,6 +411,17 @@ const I18N = {
     fc_unavailable: "该类别暂不开放（Unavailable）",
     fc_never: "按当前推进速度短期内排不到",
     fc_disclaimer: "仅按历史推进速度做统计估算。政策变动、每年 10 月财年重置、需求激增都会改变结果。",
+    fy_reset_soon: "距 10/1 财年重置还有 {n} 期。财年末名额收紧，小类别（含 EB4/SR）此时常被退表或转 Unavailable，10 月通常又放开。",
+    fy_retro_watch: "本期你的类别出现后退，重点关注下期公告。",
+    uscis_title: "本月 USCIS 递交用表",
+    uscis_line: "境内递交 I-485，{kind}这个月用 {chart}。",
+    uscis_kind_emp: "职业类",
+    uscis_kind_fam: "家庭类",
+    uscis_chart_a: "Chart A（Final Action Dates / 终裁日期）",
+    uscis_chart_b: "Chart B（Dates for Filing / 递交日期）",
+    uscis_note: "手动维护，以 uscis.gov/visabulletininfo 为准。",
+    notices_title: "官方公告",
+    notices_toggle: "本期 {n} 条",
   },
   es: {
     title: "Seguimiento de Fecha Prioritaria (Green Card)",
@@ -438,6 +489,17 @@ const I18N = {
     fc_unavailable: "Categoría no disponible",
     fc_never: "Inalcanzable al ritmo actual",
     fc_disclaimer: "Estimación estadística basada solo en el movimiento histórico. Cambios de política, el reinicio del año fiscal del 1 de octubre o picos de demanda lo alterarán.",
+    fy_reset_soon: "El año fiscal se reinicia el 1 de octubre — a {n} mes(es). Las categorías pequeñas suelen retroceder o quedar no disponibles cerca del cierre del año.",
+    fy_retro_watch: "Tu categoría retrocedió este mes — revisa el boletín del próximo mes.",
+    uscis_title: "Tabla de presentación de USCIS este mes",
+    uscis_line: "Para presentar el I-485 dentro de EE. UU., {kind} usa {chart} este mes.",
+    uscis_kind_emp: "categoría de empleo",
+    uscis_kind_fam: "categoría familiar",
+    uscis_chart_a: "Tabla A (Fechas de Acción Final)",
+    uscis_chart_b: "Tabla B (Fechas para Presentar)",
+    uscis_note: "Mantenida manualmente — la fuente oficial es uscis.gov/visabulletininfo.",
+    notices_title: "Avisos oficiales",
+    notices_toggle: "{n} este mes",
   },
 };
 
@@ -471,6 +533,8 @@ function applyLang() {
   renderVersionBadge();
   renderLatestTable();
   const p = getProfile();
+  renderNotices(p);
+  renderUscisNote(p);
   if (p.priority_date) {
     renderMyStatus(p);
     renderForecast(p);
@@ -518,6 +582,21 @@ async function getBulletin(year, month) {
     DATA.bulletins[key] = await res.json();
   }
   return DATA.bulletins[key];
+}
+
+async function loadUscisCharts() {
+  if (DATA.uscis !== undefined) return DATA.uscis;
+  try {
+    const res = await fetch(API_BASE + "/api/uscis-charts?_=" + Date.now());
+    if (!res.ok) throw new Error("server uscis unavailable");
+    DATA.uscis = await res.json();
+  } catch {
+    try {
+      const res = await fetch("data/uscis_charts.json?_=" + Date.now());
+      DATA.uscis = res.ok ? await res.json() : null;
+    } catch { DATA.uscis = null; }
+  }
+  return DATA.uscis;
 }
 
 async function getLatestBulletin() {
@@ -758,6 +837,71 @@ async function renderForecast(p) {
     ${rows}
     <p class="fc-note">${t("fc_disclaimer")}</p>
   </div>`;
+
+  renderFyNote(p, bulletins);
+}
+
+function monthsToFyReset(month) {           // month: 1-12
+  return ((10 - month) % 12) || 12;
+}
+
+function renderFyNote(p, bulletins) {
+  const el = document.getElementById("fy-note");
+  el.innerHTML = "";
+  if (!DATA.index?.bulletins?.length) return;
+  const { month } = DATA.index.bulletins[0];
+  const retro = ["A", "B"].some(chart => {
+    const fc = forecast(p.priority_date, p.category, p.country, bulletins, chart);
+    return fc.this_month_days != null && fc.this_month_days < 0;
+  });
+  const parts = [];
+  const m = monthsToFyReset(month);
+  if (m <= 2) parts.push(t("fy_reset_soon", { n: m }));
+  if (retro) parts.push(t("fy_retro_watch"));
+  if (!parts.length) return;
+  el.innerHTML = `<div class="note-strip warn">${parts.map(x => `<div>${x}</div>`).join("")}</div>`;
+}
+
+async function renderUscisNote(p) {
+  const el = document.getElementById("uscis-note");
+  el.innerHTML = "";
+  const u = await loadUscisCharts();
+  if (!u || !u.month) return;
+  const isFamily = (p.category || "").toUpperCase().startsWith("F");
+  const which = isFamily ? u.family : u.employment;
+  if (which !== "A" && which !== "B") return;
+  const kind = t(isFamily ? "uscis_kind_fam" : "uscis_kind_emp");
+  const chart = t(which === "A" ? "uscis_chart_a" : "uscis_chart_b");
+  el.innerHTML = `<div class="note-strip">
+    <b>${t("uscis_title")} · ${u.month}</b><br>
+    ${t("uscis_line", { kind, chart })}
+    <span class="sub">${t("uscis_note")}</span>
+  </div>`;
+}
+
+async function renderNotices(p) {
+  const el = document.getElementById("notices-block");
+  el.innerHTML = "";
+  const b = await getLatestBulletin();
+  const notices = b?.notices || [];
+  if (!notices.length) return;
+  const catTag = (p.category || "").split("-")[0].toUpperCase().replace("EB", "EB-");
+  const items = notices.map(nt => {
+    const hit = catTag && nt.title.toUpperCase().includes(catTag);
+    return `<div class="notice-item${hit ? " hit" : ""}">
+      <div class="n-title"><span class="n-letter">${nt.letter}.</span>${nt.title}</div>
+      <div class="n-text">${nt.text}</div>
+    </div>`;
+  }).join("");
+  el.innerHTML = `<div class="card">
+    <div class="notices-head" onclick="this.classList.toggle('open');
+      this.nextElementSibling.style.display = this.classList.contains('open') ? 'block' : 'none';">
+      <span class="chev">▶</span>
+      <span class="card-title" style="margin:0">${t("notices_title")}</span>
+      <span style="font-size:0.76rem;color:#999">${t("notices_toggle", { n: notices.length })}</span>
+    </div>
+    <div style="display:none;margin-top:10px">${items}</div>
+  </div>`;
 }
 
 function renderVersionBadge() {
@@ -799,6 +943,8 @@ async function saveAndCheck() {
   const p = saveProfile();
   await renderMyStatus(p);
   await renderForecast(p);
+  await renderUscisNote(p);
+  await renderNotices(p);
   await renderTrend(p);
 }
 
@@ -993,6 +1139,8 @@ async function renderLatestTable() {
     renderVersionBadge();
     await renderLatestTable();
     const p = getProfile();
+    await renderNotices(p);
+    await renderUscisNote(p);
     if (p.priority_date) {
       await renderMyStatus(p);
       await renderForecast(p);

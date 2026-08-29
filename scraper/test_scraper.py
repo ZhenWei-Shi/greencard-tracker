@@ -6,7 +6,7 @@
 import pytest
 from scraper import (
     parse_date, normalize_country, normalize_category, detect_chart_type,
-    nest_entries,
+    nest_entries, extract_notices,
 )
 from bs4 import BeautifulSoup
 
@@ -143,6 +143,49 @@ class TestNestEntries:
 
     def test_empty(self):
         assert nest_entries([]) == {}
+
+
+# ---- extract_notices ----
+
+NOTICE_HTML = """<html><body>
+<p>Section 203(c) of the INA provides up to 55,000 immigrant visas for the DIVERSITY IMMIGRANT (DV) CATEGORY.</p>
+<p>A. FINAL ACTION DATES FOR FAMILY-SPONSORED PREFERENCE CASES</p>
+<p>C.</p>
+<p>AVAILABILITY OF FAMILY-SPONSORED AND EMPLOYMENT-BASED VISAS</p>
+<p>Immigrant visa issuance rates for aliens from certain countries have decreased .</p>
+<p>E.</p>
+<p>VISA AVAILABILITY IN THE EMPLOYMENT-BASED SECOND PREFERENCE (EB-2) CATEGORY</p>
+<p>Sufficient demand may make it necessary to retrogress the final action date .</p>
+<p>Department of State Publication 9514</p>
+<p>CA/VO: August 10, 2026</p>
+</body></html>"""
+
+
+class TestExtractNotices:
+    def _run(self):
+        return extract_notices(BeautifulSoup(NOTICE_HTML, "html.parser"))
+
+    def test_finds_lettered_notices_after_dv(self):
+        letters = [n["letter"] for n in self._run()]
+        assert letters == ["C", "E"]
+
+    def test_skips_table_header_a(self):
+        assert all("FINAL ACTION DATES FOR FAMILY" not in n["title"] for n in self._run())
+
+    def test_captures_title_and_body(self):
+        c = next(n for n in self._run() if n["letter"] == "C")
+        assert c["title"] == "AVAILABILITY OF FAMILY-SPONSORED AND EMPLOYMENT-BASED VISAS"
+        assert "issuance rates" in c["text"]
+        assert "Department of State Publication" not in c["text"]
+
+    def test_body_whitespace_before_punctuation_fixed(self):
+        c = next(n for n in self._run() if n["letter"] == "C")
+        assert "decreased ." not in c["text"]
+        assert c["text"].endswith("decreased.")
+
+    def test_no_notices_returns_empty_list(self):
+        soup = BeautifulSoup("<html><body><p>nothing here</p></body></html>", "html.parser")
+        assert extract_notices(soup) == []
 
 
 # ---- 集成测试（真实网络，可跳过）----
