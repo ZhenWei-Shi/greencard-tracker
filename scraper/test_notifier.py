@@ -3,7 +3,10 @@
 运行：pytest scraper/test_notifier.py -v
 """
 
-from notifier import date_diff_months, calc_movement_days, find_cutoff, previous_month
+from notifier import (
+    date_diff_months, calc_movement_days, find_cutoff, previous_month,
+    format_forecast,
+)
 
 
 class TestDateDiffMonths:
@@ -76,3 +79,30 @@ class TestPreviousMonth:
 
     def test_year_rollover(self):
         assert previous_month(2026, 1) == (2025, 12)
+
+
+class TestFormatForecast:
+    def test_eligible_returns_empty(self):
+        assert format_forecast({"eligible": True, "chart": "A"}) == ""
+        assert format_forecast({"is_current": True, "chart": "B"}) == ""
+
+    def test_unavailable(self):
+        line = format_forecast({"chart": "A", "unavailable": True})
+        assert "Unavailable" in line and "获批" in line
+
+    def test_never_reaches(self):
+        line = format_forecast({
+            "chart": "B", "months_expected": None, "confidence": "low",
+        })
+        assert "难以排到" in line and "递交" in line
+
+    def test_normal_line_has_range_and_probs(self):
+        line = format_forecast({
+            "chart": "A", "months_expected": 18.0, "months_optimistic": 12.0,
+            "months_conservative": 40.0, "confidence": "medium",
+            "prob_current_next": 0.1, "prob_retrogress": 0.25,
+        })
+        assert "18 个月" in line and "获批" in line
+        assert "乐观 12" in line and "保守 40" in line
+        assert "~10%" in line and "~25%" in line
+        assert "置信度中" in line

@@ -755,5 +755,177 @@
       "country": "Philippines",
       "cutoff_date": "Current"
     }
-  ]
+  ],
+  "final_action": {
+    "F1": {
+      "ROW": "2016-03-15",
+      "China": "2016-03-15",
+      "India": "2016-03-15",
+      "Mexico": "2005-01-01",
+      "Philippines": "2012-07-15"
+    },
+    "F2A": {
+      "ROW": "2022-01-01",
+      "China": "2022-01-01",
+      "India": "2022-01-01",
+      "Mexico": "2021-05-15",
+      "Philippines": "2022-01-01"
+    },
+    "F2B": {
+      "ROW": "2016-07-22",
+      "China": "2016-07-22",
+      "India": "2016-07-22",
+      "Mexico": "2006-01-01",
+      "Philippines": "2012-01-22"
+    },
+    "F3": {
+      "ROW": "2011-04-01",
+      "China": "2011-04-01",
+      "India": "2011-04-01",
+      "Mexico": "2001-01-15",
+      "Philippines": "2003-03-22"
+    },
+    "F4": {
+      "ROW": "2007-08-01",
+      "China": "2007-08-01",
+      "India": "2006-06-15",
+      "Mexico": "2001-03-15",
+      "Philippines": "2005-01-01"
+    },
+    "EB1": {
+      "ROW": "Current",
+      "China": "2022-11-08",
+      "India": "2022-02-15",
+      "Mexico": "Current",
+      "Philippines": "Current"
+    },
+    "EB2": {
+      "ROW": "2023-06-22",
+      "China": "2020-10-01",
+      "India": "2013-01-01",
+      "Mexico": "2023-06-22",
+      "Philippines": "2023-06-22"
+    },
+    "EB3": {
+      "ROW": "2023-01-01",
+      "China": "2020-11-01",
+      "India": "2013-04-01",
+      "Mexico": "2023-01-01",
+      "Philippines": "2023-01-01"
+    },
+    "EB3-OW": {
+      "ROW": "2021-05-22",
+      "China": "2017-04-01",
+      "India": "2013-04-01",
+      "Mexico": "2021-05-22",
+      "Philippines": "2021-05-22"
+    },
+    "EB4": {
+      "ROW": null,
+      "China": null,
+      "India": null,
+      "Mexico": null,
+      "Philippines": null
+    },
+    "EB4-R": {
+      "ROW": null,
+      "China": null,
+      "India": null,
+      "Mexico": null,
+      "Philippines": null
+    },
+    "EB5": {
+      "ROW": "Current",
+      "China": "Current",
+      "India": "Current",
+      "Mexico": "Current",
+      "Philippines": "Current"
+    }
+  },
+  "filing": {
+    "F1": {
+      "ROW": "2017-09-01",
+      "China": "2017-09-01",
+      "India": "2017-09-01",
+      "Mexico": "2006-04-01",
+      "Philippines": "2015-04-22"
+    },
+    "F2A": {
+      "ROW": "2024-10-15",
+      "China": "2024-10-15",
+      "India": "2024-10-15",
+      "Mexico": "2024-10-15",
+      "Philippines": "2024-10-15"
+    },
+    "F2B": {
+      "ROW": "2017-01-01",
+      "China": "2017-01-01",
+      "India": "2017-01-01",
+      "Mexico": "2007-04-01",
+      "Philippines": "2013-10-01"
+    },
+    "F3": {
+      "ROW": "2012-07-22",
+      "China": "2012-07-22",
+      "India": "2012-07-22",
+      "Mexico": "2001-06-15",
+      "Philippines": "2004-09-22"
+    },
+    "F4": {
+      "ROW": "2008-04-01",
+      "China": "2008-04-01",
+      "India": "2006-10-01",
+      "Mexico": "2001-04-30",
+      "Philippines": "2008-01-01"
+    },
+    "EB1": {
+      "ROW": "Current",
+      "China": "2023-01-01",
+      "India": "2022-04-15",
+      "Mexico": "Current",
+      "Philippines": "Current"
+    },
+    "EB2": {
+      "ROW": "2023-08-01",
+      "China": "2020-11-01",
+      "India": "2013-02-01",
+      "Mexico": "2023-08-01",
+      "Philippines": "2023-08-01"
+    },
+    "EB3": {
+      "ROW": "2023-03-01",
+      "China": "2020-11-15",
+      "India": "2013-06-08",
+      "Mexico": "2023-03-01",
+      "Philippines": "2023-03-01"
+    },
+    "EB3-OW": {
+      "ROW": "2021-06-22",
+      "China": "2018-01-01",
+      "India": "2013-06-08",
+      "Mexico": "2021-06-22",
+      "Philippines": "2021-06-22"
+    },
+    "EB4": {
+      "ROW": "2021-02-01",
+      "China": "2021-02-01",
+      "India": "2021-02-01",
+      "Mexico": "2021-02-01",
+      "Philippines": "2021-02-01"
+    },
+    "EB4-R": {
+      "ROW": "2021-02-01",
+      "China": "2021-02-01",
+      "India": "2021-02-01",
+      "Mexico": "2021-02-01",
+      "Philippines": "2021-02-01"
+    },
+    "EB5": {
+      "ROW": "Current",
+      "China": "Current",
+      "India": "Current",
+      "Mexico": "Current",
+      "Philippines": "Current"
+    }
+  }
 }

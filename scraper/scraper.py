@@ -11,7 +11,7 @@ import requests
 from datetime import datetime, timezone
 from bs4 import BeautifulSoup
 
-BASE_URL = "https://travel.state.gov"
+BASE_URL = "https://adoption.state.gov"
 BULLETIN_INDEX = f"{BASE_URL}/content/travel/en/legal/visa-law0/visa-bulletin.html"
 DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "data")
 
@@ -139,7 +139,26 @@ def get_bulletin_urls() -> list[dict]:
             if full not in seen:
                 seen.add(full)
                 urls.append({"url": full, "text": a.get_text(strip=True)})
+
+    # 索引页链接顺序不保证按时间排列（adoption.state.gov 镜像会把某些月份排在前面），
+    # 这里按公告的 年-月 从新到旧排序，保证 --history N 取到的是最新的 N 期。
+    def sort_key(item):
+        m = re.search(r"visa-bulletin-for-(\w+)-(\d{4})", item["url"])
+        if not m:
+            return (0, 0)
+        return (int(m.group(2)), MONTH_MAP.get(m.group(1).upper()[:3], 0))
+
+    urls.sort(key=sort_key, reverse=True)
     return urls
+
+
+def nest_entries(entries: list[dict]) -> dict:
+    """把扁平的 [{category, country, cutoff_date}] 折叠成 {类别: {国家: 值}} 两层对象，
+    方便前端 / 预测直接寻址（data.final_action['EB4']['China']），不用再遍历 find。"""
+    out: dict = {}
+    for e in entries:
+        out.setdefault(e["category"], {})[e["country"]] = e["cutoff_date"]
+    return out
 
 
 def parse_bulletin_page(url: str) -> dict | None:
@@ -181,6 +200,12 @@ def parse_bulletin_page(url: str) -> dict | None:
         else:
             result["chart_b"].extend(entries)
 
+    # 扁平数组保留（前端旧逻辑、notifier 都还在用），额外产出嵌套结构：
+    #   final_action = Chart A（终裁日期）  filing = Chart B（可递交日期）
+    # 值仍是三态：日期字符串 / "Current" / null。
+    result["final_action"] = nest_entries(result["chart_a"])
+    result["filing"] = nest_entries(result["chart_b"])
+
     return result
 
 
@@ -201,8 +226,15 @@ def rebuild_index():
     )
     index = []
     for fname in files:
-        with open(os.path.join(DATA_DIR, fname), encoding="utf-8") as f:
+        path = os.path.join(DATA_DIR, fname)
+        with open(path, encoding="utf-8") as f:
             d = json.load(f)
+        # 顺手给老快照补上嵌套结构（早于本次改动抓的文件没有 final_action / filing）
+        if "final_action" not in d or "filing" not in d:
+            d["final_action"] = nest_entries(d.get("chart_a", []))
+            d["filing"] = nest_entries(d.get("chart_b", []))
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump(d, f, ensure_ascii=False, indent=2)
         index.append({"year": d["year"], "month": d["month"], "file": fname})
 
     with open(os.path.join(DATA_DIR, "index.json"), "w", encoding="utf-8") as f:

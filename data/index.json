@@ -2,6 +2,16 @@
   "bulletins": [
     {
       "year": 2026,
+      "month": 9,
+      "file": "bulletin_2026_09.json"
+    },
+    {
+      "year": 2026,
+      "month": 8,
+      "file": "bulletin_2026_08.json"
+    },
+    {
+      "year": 2026,
       "month": 7,
       "file": "bulletin_2026_07.json"
     },
@@ -121,5 +131,5 @@
       "file": "bulletin_2024_08.json"
     }
   ],
-  "updated_at": "2026-06-30T19:54:48.964352+00:00"
+  "updated_at": "2026-08-29T03:41:37.984714+00:00"
 }
